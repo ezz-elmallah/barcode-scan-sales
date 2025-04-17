@@ -234,258 +234,318 @@
         let currentScannerSection = null;
 
         // DOM Elements
-        const landingPage = document.getElementById('landingPage');
-        const inventorySection = document.getElementById('inventorySection');
-        const posSection = document.getElementById('posSection');
-        const scannerSection = document.getElementById('scannerSection');
-        const barcodeInput = document.getElementById('barcodeInput');
-        const itemName = document.getElementById('itemName');
-        const itemPrice = document.getElementById('itemPrice');
-        const saveItem = document.getElementById('saveItem');
-        const editItem = document.getElementById('editItem');
-        const inventoryList = document.getElementById('inventoryList');
-        const posBarcode = document.getElementById('posBarcode');
-        const cartList = document.getElementById('cartList');
-        const totalItems = document.getElementById('totalItems');
-        const totalAmount = document.getElementById('totalAmount');
-        const clearCart = document.getElementById('clearCart');
-        const printReceipt = document.getElementById('printReceipt');
-        const receiptDate = document.getElementById('receiptDate');
-        const receiptItems = document.getElementById('receiptItems');
-        const receiptTotal = document.getElementById('receiptTotal');
-        const startScanner = document.getElementById('startScanner');
-        const stopScanner = document.getElementById('stopScanner');
-        const scannerVideo = document.getElementById('scannerVideo');
-        const scannerOverlay = document.getElementById('scannerOverlay');
-        const scannerFeedback = document.getElementById('scannerFeedback');
-        const manualBarcode = document.getElementById('manualBarcode');
-        const manualScan = document.getElementById('manualScan');
-        const inventoryStartScanner = document.getElementById('inventoryStartScanner');
-        const inventoryStopScanner = document.getElementById('inventoryStopScanner');
-        const inventoryScannerVideo = document.getElementById('inventoryScannerVideo');
-        const inventoryScannerOverlay = document.getElementById('inventoryScannerOverlay');
-        const inventoryScannerFeedback = document.getElementById('inventoryScannerFeedback');
-        const inventoryManualScan = document.getElementById('inventoryManualScan');
-        const posStartScanner = document.getElementById('posStartScanner');
-        const posStopScanner = document.getElementById('posStopScanner');
-        const posScannerVideo = document.getElementById('posScannerVideo');
-        const posScannerOverlay = document.getElementById('posScannerOverlay');
-        const posScannerFeedback = document.getElementById('posScannerFeedback');
-        const posManualScan = document.getElementById('posManualScan');
+        const elements = {
+            landingPage: document.getElementById('landingPage'),
+            inventorySection: document.getElementById('inventorySection'),
+            posSection: document.getElementById('posSection'),
+            scannerSection: document.getElementById('scannerSection'),
+            barcodeInput: document.getElementById('barcodeInput'),
+            itemName: document.getElementById('itemName'),
+            itemPrice: document.getElementById('itemPrice'),
+            saveItem: document.getElementById('saveItem'),
+            editItem: document.getElementById('editItem'),
+            inventoryList: document.getElementById('inventoryList'),
+            posBarcode: document.getElementById('posBarcode'),
+            cartList: document.getElementById('cartList'),
+            totalItems: document.getElementById('totalItems'),
+            totalAmount: document.getElementById('totalAmount'),
+            clearCart: document.getElementById('clearCart'),
+            printReceipt: document.getElementById('printReceipt'),
+            receiptDate: document.getElementById('receiptDate'),
+            receiptItems: document.getElementById('receiptItems'),
+            receiptTotal: document.getElementById('receiptTotal'),
+            startScanner: document.getElementById('startScanner'),
+            stopScanner: document.getElementById('stopScanner'),
+            scannerVideo: document.getElementById('scannerVideo'),
+            scannerOverlay: document.getElementById('scannerOverlay'),
+            scannerFeedback: document.getElementById('scannerFeedback'),
+            manualBarcode: document.getElementById('manualBarcode'),
+            manualScan: document.getElementById('manualScan'),
+            inventoryStartScanner: document.getElementById('inventoryStartScanner'),
+            inventoryStopScanner: document.getElementById('inventoryStopScanner'),
+            inventoryScannerVideo: document.getElementById('inventoryScannerVideo'),
+            inventoryScannerOverlay: document.getElementById('inventoryScannerOverlay'),
+            inventoryScannerFeedback: document.getElementById('inventoryScannerFeedback'),
+            inventoryManualScan: document.getElementById('inventoryManualScan'),
+            posStartScanner: document.getElementById('posStartScanner'),
+            posStopScanner: document.getElementById('posStopScanner'),
+            posScannerVideo: document.getElementById('posScannerVideo'),
+            posScannerOverlay: document.getElementById('posScannerOverlay'),
+            posScannerFeedback: document.getElementById('posScannerFeedback'),
+            posManualScan: document.getElementById('posManualScan')
+        };
+
+        // Check if all elements are loaded
+        for (const [key, element] of Object.entries(elements)) {
+            if (!element) {
+                console.error(`Element ${key} not found in DOM`);
+            }
+        }
 
         // Initialize
-        renderInventory();
-        renderCart();
-        console.log('Page loaded successfully');
+        try {
+            renderInventory();
+            renderCart();
+            console.log('Page initialized successfully');
+        } catch (err) {
+            console.error('Initialization error:', err);
+            document.body.innerHTML = '<div class="text-center p-6 text-red-600">Failed to initialize application. Please refresh the page.</div>';
+        }
 
         // Show Section
         function showSection(section) {
-            landingPage.classList.add('hidden');
-            inventorySection.classList.add('hidden');
-            posSection.classList.add('hidden');
-            scannerSection.classList.add('hidden');
+            try {
+                elements.landingPage.classList.add('hidden');
+                elements.inventorySection.classList.add('hidden');
+                elements.posSection.classList.add('hidden');
+                elements.scannerSection.classList.add('hidden');
 
-            if (section === 'landing') {
-                landingPage.classList.remove('hidden');
-                stopScannerFunc();
-            } else if (section === 'inventory') {
-                inventorySection.classList.remove('hidden');
-                stopScannerFunc();
-            } else if (section === 'pos') {
-                posSection.classList.remove('hidden');
-                stopScannerFunc();
-            } else if (section === 'scanner') {
-                scannerSection.classList.remove('hidden');
+                if (section === 'landing') {
+                    elements.landingPage.classList.remove('hidden');
+                    stopScannerFunc();
+                } else if (section === 'inventory') {
+                    elements.inventorySection.classList.remove('hidden');
+                    stopScannerFunc();
+                } else if (section === 'pos') {
+                    elements.posSection.classList.remove('hidden');
+                    stopScannerFunc();
+                } else if (section === 'scanner') {
+                    elements.scannerSection.classList.remove('hidden');
+                }
+                console.log(`Switched to section: ${section}`);
+            } catch (err) {
+                console.error('Error in showSection:', err);
             }
         }
 
         // Save or Update Item
-        saveItem.addEventListener('click', () => {
-            const barcode = barcodeInput.value.trim();
-            const name = itemName.value.trim();
-            const price = parseFloat(itemPrice.value);
+        elements.saveItem.addEventListener('click', () => {
+            try {
+                const barcode = elements.barcodeInput.value.trim();
+                const name = elements.itemName.value.trim();
+                const price = parseFloat(elements.itemPrice.value);
 
-            if (barcode && name && price > 0) {
-                inventory[barcode] = { name, price };
-                localStorage.setItem('inventory', JSON.stringify(inventory));
-                renderInventory();
-                clearInputs();
-                inventoryScannerFeedback.textContent = 'Item saved successfully!';
-                inventoryScannerFeedback.classList.remove('hidden', 'error-message');
-                inventoryScannerFeedback.classList.add('success-message');
-                setTimeout(() => inventoryScannerFeedback.classList.add('hidden'), 3000);
-            } else {
-                inventoryScannerFeedback.textContent = 'Please fill all fields with valid data.';
-                inventoryScannerFeedback.classList.remove('hidden', 'success-message');
-                inventoryScannerFeedback.classList.add('error-message');
+                if (barcode && name && price > 0) {
+                    inventory[barcode] = { name, price };
+                    localStorage.setItem('inventory', JSON.stringify(inventory));
+                    renderInventory();
+                    clearInputs();
+                    showFeedback(elements.inventoryScannerFeedback, 'Item saved successfully!', true);
+                } else {
+                    showFeedback(elements.inventoryScannerFeedback, 'Please fill all fields with valid data.', false);
+                }
+            } catch (err) {
+                console.error('Error saving item:', err);
+                showFeedback(elements.inventoryScannerFeedback, 'Error saving item. Please try again.', false);
             }
         });
 
         // Edit Item
         function prepareEdit(barcode) {
-            const item = inventory[barcode];
-            barcodeInput.value = barcode;
-            itemName.value = item.name;
-            itemPrice.value = item.price;
-            barcodeInput.disabled = true;
-            saveItem.classList.add('hidden');
-            editItem.classList.remove('hidden');
+            try {
+                const item = inventory[barcode];
+                elements.barcodeInput.value = barcode;
+                elements.itemName.value = item.name;
+                elements.itemPrice.value = item.price;
+                elements.barcodeInput.disabled = true;
+                elements.saveItem.classList.add('hidden');
+                elements.editItem.classList.remove('hidden');
 
-            editItem.onclick = () => {
-                const name = itemName.value.trim();
-                const price = parseFloat(itemPrice.value);
-                if (name && price > 0) {
-                    inventory[barcode] = { name, price };
-                    localStorage.setItem('inventory', JSON.stringify(inventory));
-                    renderInventory();
-                    clearInputs();
-                    barcodeInput.disabled = false;
-                    saveItem.classList.remove('hidden');
-                    editItem.classList.add('hidden');
-                    inventoryScannerFeedback.textContent = 'Item updated successfully!';
-                    inventoryScannerFeedback.classList.remove('hidden', 'error-message');
-                    inventoryScannerFeedback.classList.add('success-message');
-                    setTimeout(() => inventoryScannerFeedback.classList.add('hidden'), 3000);
-                } else {
-                    inventoryScannerFeedback.textContent = 'Please fill all fields with valid data.';
-                    inventoryScannerFeedback.classList.remove('hidden', 'success-message');
-                    inventoryScannerFeedback.classList.add('error-message');
-                }
-            };
+                elements.editItem.onclick = () => {
+                    try {
+                        const name = elements.itemName.value.trim();
+                        const price = parseFloat(elements.itemPrice.value);
+                        if (name && price > 0) {
+                            inventory[barcode] = { name, price };
+                            localStorage.setItem('inventory', JSON.stringify(inventory));
+                            renderInventory();
+                            clearInputs();
+                            elements.barcodeInput.disabled = false;
+                            elements.saveItem.classList.remove('hidden');
+                            elements.editItem.classList.add('hidden');
+                            showFeedback(elements.inventoryScannerFeedback, 'Item updated successfully!', true);
+                        } else {
+                            showFeedback(elements.inventoryScannerFeedback, 'Please fill all fields with valid data.', false);
+                        }
+                    } catch (err) {
+                        console.error('Error updating item:', err);
+                        showFeedback(elements.inventoryScannerFeedback, 'Error updating item. Please try again.', false);
+                    }
+                };
+            } catch (err) {
+                console.error('Error preparing edit:', err);
+                showFeedback(elements.inventoryScannerFeedback, 'Error preparing item for edit.', false);
+            }
         }
 
         // Delete Item
         function deleteItem(barcode) {
-            if (confirm('Are you sure you want to delete this item?')) {
-                delete inventory[barcode];
-                localStorage.setItem('inventory', JSON.stringify(inventory));
-                renderInventory();
-                inventoryScannerFeedback.textContent = 'Item deleted successfully!';
-                inventoryScannerFeedback.classList.remove('hidden', 'error-message');
-                inventoryScannerFeedback.classList.add('success-message');
-                setTimeout(() => inventoryScannerFeedback.classList.add('hidden'), 3000);
+            try {
+                if (confirm('Are you sure you want to delete this item?')) {
+                    delete inventory[barcode];
+                    localStorage.setItem('inventory', JSON.stringify(inventory));
+                    renderInventory();
+                    showFeedback(elements.inventoryScannerFeedback, 'Item deleted successfully!', true);
+                }
+            } catch (err) {
+                console.error('Error deleting item:', err);
+                showFeedback(elements.inventoryScannerFeedback, 'Error deleting item. Please try again.', false);
             }
         }
 
         // Render Inventory
         function renderInventory() {
-            inventoryList.innerHTML = '';
-            for (const barcode in inventory) {
-                const item = inventory[barcode];
-                const itemCard = document.createElement('div');
-                itemCard.className = 'item-card bg-gray-50 p-4 rounded-md mb-2 flex justify-between items-center';
-                itemCard.innerHTML = `
-                    <div>
-                        <p class="font-medium">${item.name}</p>
-                        <p class="text-sm text-gray-600">Barcode: ${barcode}</p>
-                        <p class="text-sm text-gray-600">Price: $${item.price.toFixed(2)}</p>
-                    </div>
-                    <div>
-                        <button onclick="prepareEdit('${barcode}')" class="text-yellow-500 hover:text-yellow-600 mr-2">Edit</button>
-                        <button onclick="deleteItem('${barcode}')" class="text-red-500 hover:text-red-600">Delete</button>
-                    </div>
-                `;
-                inventoryList.appendChild(itemCard);
+            try {
+                elements.inventoryList.innerHTML = '';
+                for (const barcode in inventory) {
+                    const item = inventory[barcode];
+                    const itemCard = document.createElement('div');
+                    itemCard.className = 'item-card bg-gray-50 p-4 rounded-md mb-2 flex justify-between items-center';
+                    itemCard.innerHTML = `
+                        <div>
+                            <p class="font-medium">${item.name}</p>
+                            <p class="text-sm text-gray-600">Barcode: ${barcode}</p>
+                            <p class="text-sm text-gray-600">Price: $${item.price.toFixed(2)}</p>
+                        </div>
+                        <div>
+                            <button onclick="prepareEdit('${barcode}')" class="text-yellow-500 hover:text-yellow-600 mr-2">Edit</button>
+                            <button onclick="deleteItem('${barcode}')" class="text-red-500 hover:text-red-600">Delete</button>
+                        </div>
+                    `;
+                    elements.inventoryList.appendChild(itemCard);
+                }
+            } catch (err) {
+                console.error('Error rendering inventory:', err);
+                showFeedback(elements.inventoryScannerFeedback, 'Error loading inventory. Please refresh.', false);
             }
         }
 
         // Clear Inputs
         function clearInputs() {
-            barcodeInput.value = '';
-            itemName.value = '';
-            itemPrice.value = '';
+            try {
+                elements.barcodeInput.value = '';
+                elements.itemName.value = '';
+                elements.itemPrice.value = '';
+            } catch (err) {
+                console.error('Error clearing inputs:', err);
+            }
         }
 
         // POS: Add to Cart
         function addToCart(barcode) {
-            if (inventory[barcode]) {
-                cart.push({ barcode, ...inventory[barcode] });
-                renderCart();
-                posScannerFeedback.textContent = `Added ${inventory[barcode].name} to cart!`;
-                posScannerFeedback.classList.remove('hidden', 'error-message');
-                posScannerFeedback.classList.add('success-message');
-                posScannerVideo.classList.add('scanner-success');
-                setTimeout(() => {
-                    posScannerFeedback.classList.add('hidden');
-                    posScannerVideo.classList.remove('scanner-success');
-                }, 2000);
-            } else {
-                posScannerFeedback.textContent = 'Item not found in inventory.';
-                posScannerFeedback.classList.remove('hidden', 'success-message');
-                posScannerFeedback.classList.add('error-message');
-                setTimeout(() => posScannerFeedback.classList.add('hidden'), 3000);
+            try {
+                if (inventory[barcode]) {
+                    cart.push({ barcode, ...inventory[barcode] });
+                    renderCart();
+                    showFeedback(elements.posScannerFeedback, `Added ${inventory[barcode].name} to cart!`, true);
+                    elements.posScannerVideo.classList.add('scanner-success');
+                    setTimeout(() => elements.posScannerVideo.classList.remove('scanner-success'), 500);
+                } else {
+                    showFeedback(elements.posScannerFeedback, 'Item not found in inventory.', false);
+                }
+                elements.posBarcode.value = '';
+            } catch (err) {
+                console.error('Error adding to cart:', err);
+                showFeedback(elements.posScannerFeedback, 'Error adding item to cart.', false);
             }
-            posBarcode.value = '';
         }
 
-        posBarcode.addEventListener('input', () => {
-            const barcode = posBarcode.value.trim();
-            if (barcode) addToCart(barcode);
+        elements.posBarcode.addEventListener('input', () => {
+            try {
+                const barcode = elements.posBarcode.value.trim();
+                if (barcode) addToCart(barcode);
+            } catch (err) {
+                console.error('Error in POS barcode input:', err);
+                showFeedback(elements.posScannerFeedback, 'Error processing barcode input.', false);
+            }
         });
 
         // Render Cart
         function renderCart() {
-            cartList.innerHTML = '';
-            let total = 0;
-            cart.forEach((item, index) => {
-                total += item.price;
-                const cartItem = document.createElement('div');
-                cartItem.className = 'bg-gray-50 p-4 rounded-md mb-2 flex justify-between items-center';
-                cartItem.innerHTML = `
-                    <div>
-                        <p class="font-medium">${item.name}</p>
-                        <p class="text-sm text-gray-600">Price: $${item.price.toFixed(2)}</p>
-                    </div>
-                    <button onclick="removeFromCart(${index})" class="text-red-500 hover:text-red-600">Remove</button>
-                `;
-                cartList.appendChild(cartItem);
-            });
-            totalItems.textContent = cart.length;
-            totalAmount.textContent = total.toFixed(2);
+            try {
+                elements.cartList.innerHTML = '';
+                let total = 0;
+                cart.forEach((item, index) => {
+                    total += item.price;
+                    const cartItem = document.createElement('div');
+                    cartItem.className = 'bg-gray-50 p-4 rounded-md mb-2 flex justify-between items-center';
+                    cartItem.innerHTML = `
+                        <div>
+                            <p class="font-medium">${item.name}</p>
+                            <p class="text-sm text-gray-600">Price: $${item.price.toFixed(2)}</p>
+                        </div>
+                        <button onclick="removeFromCart(${index})" class="text-red-500 hover:text-red-600">Remove</button>
+                    `;
+                    elements.cartList.appendChild(cartItem);
+                });
+                elements.totalItems.textContent = cart.length;
+                elements.totalAmount.textContent = total.toFixed(2);
+            } catch (err) {
+                console.error('Error rendering cart:', err);
+                showFeedback(elements.posScannerFeedback, 'Error loading cart. Please refresh.', false);
+            }
         }
 
         // Remove from Cart
         function removeFromCart(index) {
-            cart.splice(index, 1);
-            renderCart();
-            posScannerFeedback.textContent = 'Item removed from cart!';
-            posScannerFeedback.classList.remove('hidden', 'error-message');
-            posScannerFeedback.classList.add('success-message');
-            setTimeout(() => posScannerFeedback.classList.add('hidden'), 2000);
+            try {
+                cart.splice(index, 1);
+                renderCart();
+                showFeedback(elements.posScannerFeedback, 'Item removed from cart!', true);
+            } catch (err) {
+                console.error('Error removing from cart:', err);
+                showFeedback(elements.posScannerFeedback, 'Error removing item from cart.', false);
+            }
         }
 
         // Clear Cart
-        clearCart.addEventListener('click', () => {
-            cart = [];
-            renderCart();
-            posScannerFeedback.textContent = 'Cart cleared!';
-            posScannerFeedback.classList.remove('hidden', 'error-message');
-            posScannerFeedback.classList.add('success-message');
-            setTimeout(() => posScannerFeedback.classList.add('hidden'), 2000);
+        elements.clearCart.addEventListener('click', () => {
+            try {
+                cart = [];
+                renderCart();
+                showFeedback(elements.posScannerFeedback, 'Cart cleared!', true);
+            } catch (err) {
+                console.error('Error clearing cart:', err);
+                showFeedback(elements.posScannerFeedback, 'Error clearing cart.', false);
+            }
         });
 
         // Print Receipt
-        printReceipt.addEventListener('click', () => {
-            if (cart.length === 0) {
-                posScannerFeedback.textContent = 'Cart is empty.';
-                posScannerFeedback.classList.remove('hidden', 'success-message');
-                posScannerFeedback.classList.add('error-message');
-                setTimeout(() => posScannerFeedback.classList.add('hidden'), 3000);
-                return;
+        elements.printReceipt.addEventListener('click', () => {
+            try {
+                if (cart.length === 0) {
+                    showFeedback(elements.posScannerFeedback, 'Cart is empty.', false);
+                    return;
+                }
+                elements.receiptDate.textContent = new Date().toLocaleString();
+                elements.receiptItems.innerHTML = '';
+                cart.forEach(item => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td class="py-2">${item.name}</td>
+                        <td class="text-right py-2">$${item.price.toFixed(2)}</td>
+                    `;
+                    elements.receiptItems.appendChild(row);
+                });
+                elements.receiptTotal.textContent = cart.reduce((sum, item) => sum + item.price, 0).toFixed(2);
+                window.print();
+            } catch (err) {
+                console.error('Error printing receipt:', err);
+                showFeedback(elements.posScannerFeedback, 'Error printing receipt.', false);
             }
-            receiptDate.textContent = new Date().toLocaleString();
-            receiptItems.innerHTML = '';
-            cart.forEach(item => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td class="py-2">${item.name}</td>
-                    <td class="text-right py-2">$${item.price.toFixed(2)}</td>
-                `;
-                receiptItems.appendChild(row);
-            });
-            receiptTotal.textContent = cart.reduce((sum, item) => sum + item.price, 0).toFixed(2);
-            window.print();
         });
+
+        // Show Feedback
+        function showFeedback(element, message, isSuccess) {
+            try {
+                element.textContent = message;
+                element.classList.remove('hidden', isSuccess ? 'error-message' : 'success-message');
+                element.classList.add(isSuccess ? 'success-message' : 'error-message');
+                setTimeout(() => element.classList.add('hidden'), 3000);
+            } catch (err) {
+                console.error('Error showing feedback:', err);
+            }
+        }
 
         // Check Camera Permission
         async function checkCameraPermission(feedbackElement) {
@@ -495,44 +555,45 @@
                 return true;
             } catch (err) {
                 console.error('Camera permission error:', err);
-                feedbackElement.textContent = 'Camera access denied. Please allow camera access or use manual input.';
-                feedbackElement.classList.remove('hidden', 'success-message');
-                feedbackElement.classList.add('error-message');
+                showFeedback(feedbackElement, 'Camera access denied. Please allow camera access or use manual input.', false);
                 return false;
             }
         }
 
         // Generic Barcode Scanner Function
         function startScanner(section, videoElement, overlayElement, feedbackElement, startButton, stopButton, callback) {
-            if (!scannerActive) {
+            if (scannerActive) {
+                console.warn(`Scanner already active in ${currentScannerSection}. Ignoring request for ${section}.`);
+                return;
+            }
+
+            try {
                 currentScannerSection = section;
                 checkCameraPermission(feedbackElement).then(hasPermission => {
                     if (!hasPermission) return;
 
-                    try {
-                        Quagga.init({
-                            inputStream: {
-                                name: "Live",
-                                type: "LiveStream",
-                                target: videoElement,
-                                constraints: {
-                                    facingMode: "environment",
-                                    width: { ideal: 640 },
-                                    height: { ideal: 480 }
-                                }
-                            },
-                            decoder: {
-                                readers: ["ean_reader", "upc_reader", "code_128_reader"]
-                            },
-                            locate: true
-                        }, function(err) {
-                            if (err) {
-                                console.error(`Quagga init error (${section}):`, err);
-                                feedbackElement.textContent = 'Failed to initialize scanner. Please try again or use manual input.';
-                                feedbackElement.classList.remove('hidden', 'success-message');
-                                feedbackElement.classList.add('error-message');
-                                return;
+                    Quagga.init({
+                        inputStream: {
+                            name: "Live",
+                            type: "LiveStream",
+                            target: videoElement,
+                            constraints: {
+                                facingMode: "environment",
+                                width: { ideal: 640 },
+                                height: { ideal: 480 }
                             }
+                        },
+                        decoder: {
+                            readers: ["ean_reader", "upc_reader", "code_128_reader"]
+                        },
+                        locate: true
+                    }, function(err) {
+                        if (err) {
+                            console.error(`Quagga init error (${section}):`, err);
+                            showFeedback(feedbackElement, 'Failed to initialize scanner. Please try again or use manual input.', false);
+                            return;
+                        }
+                        try {
                             Quagga.start();
                             scannerActive = true;
                             videoElement.classList.remove('hidden');
@@ -541,123 +602,122 @@
                             stopButton.classList.remove('hidden');
                             feedbackElement.classList.add('hidden');
                             console.log(`Scanner started for ${section}`);
-                        });
+                        } catch (startErr) {
+                            console.error(`Error starting Quagga (${section}):`, startErr);
+                            showFeedback(feedbackElement, 'Error starting scanner. Please try again.', false);
+                        }
+                    });
 
-                        Quagga.onDetected(function(data) {
+                    Quagga.onDetected(function(data) {
+                        try {
                             const barcode = data.codeResult.code;
                             callback(barcode);
                             videoElement.classList.add('scanner-success');
                             setTimeout(() => videoElement.classList.remove('scanner-success'), 500);
                             stopScannerFunc();
-                        });
-                    } catch (err) {
-                        console.error(`Scanner startup error (${section}):`, err);
-                        feedbackElement.textContent = 'Error starting scanner. Please try again or use manual input.';
-                        feedbackElement.classList.remove('hidden', 'success-message');
-                        feedbackElement.classList.add('error-message');
-                    }
+                        } catch (detectErr) {
+                            console.error(`Error processing detected barcode (${section}):`, detectErr);
+                            showFeedback(feedbackElement, 'Error processing barcode. Please try again.', false);
+                        }
+                    });
                 });
+            } catch (err) {
+                console.error(`Scanner startup error (${section}):`, err);
+                showFeedback(feedbackElement, 'Error starting scanner. Please try again or use manual input.', false);
             }
         }
 
         // Stop Scanner
         function stopScannerFunc() {
-            if (scannerActive) {
-                try {
-                    Quagga.stop();
-                    scannerActive = false;
-                    if (currentScannerSection === 'inventory') {
-                        inventoryScannerVideo.classList.add('hidden');
-                        inventoryScannerOverlay.classList.add('hidden');
-                        inventoryStartScanner.classList.remove('hidden');
-                        inventoryStopScanner.classList.add('hidden');
-                        inventoryScannerFeedback.classList.add('hidden');
-                    } else if (currentScannerSection === 'pos') {
-                        posScannerVideo.classList.add('hidden');
-                        posScannerOverlay.classList.add('hidden');
-                        posStartScanner.classList.remove('hidden');
-                        posStopScanner.classList.add('hidden');
-                        posScannerFeedback.classList.add('hidden');
-                    } else if (currentScannerSection === 'scanner') {
-                        scannerVideo.classList.add('hidden');
-                        scannerOverlay.classList.add('hidden');
-                        startScanner.classList.remove('hidden');
-                        stopScanner.classList.add('hidden');
-                        scannerFeedback.classList.add('hidden');
-                    }
-                    console.log('Scanner stopped');
-                } catch (err) {
-                    console.error('Error stopping scanner:', err);
-                    if (currentScannerSection === 'inventory') {
-                        inventoryScannerFeedback.textContent = 'Error stopping scanner. Please refresh the page.';
-                        inventoryScannerFeedback.classList.remove('hidden', 'success-message');
-                        inventoryScannerFeedback.classList.add('error-message');
-                    } else if (currentScannerSection === 'pos') {
-                        posScannerFeedback.textContent = 'Error stopping scanner. Please refresh the page.';
-                        posScannerFeedback.classList.remove('hidden', 'success-message');
-                        posScannerFeedback.classList.add('error-message');
-                    } else if (currentScannerSection === 'scanner') {
-                        scannerFeedback.textContent = 'Error stopping scanner. Please refresh the page.';
-                        scannerFeedback.classList.remove('hidden', 'success-message');
-                        scannerFeedback.classList.add('error-message');
-                    }
+            if (!scannerActive) return;
+
+            try {
+                Quagga.stop();
+                scannerActive = false;
+                if (currentScannerSection === 'inventory') {
+                    elements.inventoryScannerVideo.classList.add('hidden');
+                    elements.inventoryScannerOverlay.classList.add('hidden');
+                    elements.inventoryStartScanner.classList.remove('hidden');
+                    elements.inventoryStopScanner.classList.add('hidden');
+                    elements.inventoryScannerFeedback.classList.add('hidden');
+                } else if (currentScannerSection === 'pos') {
+                    elements.posScannerVideo.classList.add('hidden');
+                    elements.posScannerOverlay.classList.add('hidden');
+                    elements.posStartScanner.classList.remove('hidden');
+                    elements.posStopScanner.classList.add('hidden');
+                    elements.posScannerFeedback.classList.add('hidden');
+                } else if (currentScannerSection === 'scanner') {
+                    elements.scannerVideo.classList.add('hidden');
+                    elements.scannerOverlay.classList.add('hidden');
+                    elements.startScanner.classList.remove('hidden');
+                    elements.stopScanner.classList.add('hidden');
+                    elements.scannerFeedback.classList.add('hidden');
+                }
+                currentScannerSection = null;
+                console.log('Scanner stopped');
+            } catch (err) {
+                console.error('Error stopping scanner:', err);
+                if (currentScannerSection === 'inventory') {
+                    showFeedback(elements.inventoryScannerFeedback, 'Error stopping scanner. Please refresh the page.', false);
+                } else if (currentScannerSection === 'pos') {
+                    showFeedback(elements.posScannerFeedback, 'Error stopping scanner. Please refresh the page.', false);
+                } else if (currentScannerSection === 'scanner') {
+                    showFeedback(elements.scannerFeedback, 'Error stopping scanner. Please refresh the page.', false);
                 }
             }
         }
 
         // Inventory Scanner
-        inventoryStartScanner.addEventListener('click', () => {
-            startScanner('inventory', inventoryScannerVideo, inventoryScannerOverlay, inventoryScannerFeedback, inventoryStartScanner, inventoryStopScanner, (barcode) => {
-                barcodeInput.value = barcode;
-                inventoryScannerFeedback.textContent = `Scanned barcode: ${barcode}`;
-                inventoryScannerFeedback.classList.remove('hidden', 'error-message');
-                inventoryScannerFeedback.classList.add('success-message');
-                setTimeout(() => inventoryScannerFeedback.classList.add('hidden'), 3000);
+        elements.inventoryStartScanner.addEventListener('click', () => {
+            startScanner('inventory', elements.inventoryScannerVideo, elements.inventoryScannerOverlay, elements.inventoryScannerFeedback, elements.inventoryStartScanner, elements.inventoryStopScanner, (barcode) => {
+                elements.barcodeInput.value = barcode;
+                showFeedback(elements.inventoryScannerFeedback, `Scanned barcode: ${barcode}`, true);
             });
         });
 
-        inventoryStopScanner.addEventListener('click', stopScannerFunc);
+        elements.inventoryStopScanner.addEventListener('click', stopScannerFunc);
 
-        inventoryManualScan.addEventListener('click', () => {
-            const barcode = barcodeInput.value.trim();
-            if (barcode) {
-                barcodeInput.value = barcode;
-                inventoryScannerFeedback.textContent = `Manual barcode entered: ${barcode}`;
-                inventoryScannerFeedback.classList.remove('hidden', 'error-message');
-                inventoryScannerFeedback.classList.add('success-message');
-                setTimeout(() => inventoryScannerFeedback.classList.add('hidden'), 3000);
-            } else {
-                inventoryScannerFeedback.textContent = 'Please enter a barcode.';
-                inventoryScannerFeedback.classList.remove('hidden', 'success-message');
-                inventoryScannerFeedback.classList.add('error-message');
-                setTimeout(() => inventoryScannerFeedback.classList.add('hidden'), 3000);
+        elements.inventoryManualScan.addEventListener('click', () => {
+            try {
+                const barcode = elements.barcodeInput.value.trim();
+                if (barcode) {
+                    elements.barcodeInput.value = barcode;
+                    showFeedback(elements.inventoryScannerFeedback, `Manual barcode entered: ${barcode}`, true);
+                } else {
+                    showFeedback(elements.inventoryScannerFeedback, 'Please enter a barcode.', false);
+                }
+            } catch (err) {
+                console.error('Error in inventory manual scan:', err);
+                showFeedback(elements.inventoryScannerFeedback, 'Error processing manual barcode.', false);
             }
         });
 
         // POS Scanner
-        posStartScanner.addEventListener('click', () => {
-            startScanner('pos', posScannerVideo, posScannerOverlay, posScannerFeedback, posStartScanner, posStopScanner, (barcode) => {
+        elements.posStartScanner.addEventListener('click', () => {
+            startScanner('pos', elements.posScannerVideo, elements.posScannerOverlay, elements.posScannerFeedback, elements.posStartScanner, elements.posStopScanner, (barcode) => {
                 addToCart(barcode);
             });
         });
 
-        posStopScanner.addEventListener('click', stopScannerFunc);
+        elements.posStopScanner.addEventListener('click', stopScannerFunc);
 
-        posManualScan.addEventListener('click', () => {
-            const barcode = posBarcode.value.trim();
-            if (barcode) {
-                addToCart(barcode);
-            } else {
-                posScannerFeedback.textContent = 'Please enter a barcode.';
-                posScannerFeedback.classList.remove('hidden', 'success-message');
-                posScannerFeedback.classList.add('error-message');
-                setTimeout(() => posScannerFeedback.classList.add('hidden'), 3000);
+        elements.posManualScan.addEventListener('click', () => {
+            try {
+                const barcode = elements.posBarcode.value.trim();
+                if (barcode) {
+                    addToCart(barcode);
+                } else {
+                    showFeedback(elements.posScannerFeedback, 'Please enter a barcode.', false);
+                }
+            } catch (err) {
+                console.error('Error in POS manual scan:', err);
+                showFeedback(elements.posScannerFeedback, 'Error processing manual barcode.', false);
             }
         });
 
         // Main Scanner Section
-        startScanner.addEventListener('click', () => {
-            startScanner('scanner', scannerVideo, scannerOverlay, scannerFeedback, startScanner, stopScanner, (barcode) => {
+        elements.startScanner.addEventListener('click', () => {
+            startScanner('scanner', elements.scannerVideo, elements.scannerOverlay, elements.scannerFeedback, elements.startScanner, elements.stopScanner, (barcode) => {
                 let message = `Scanned Barcode: ${barcode}`;
                 if (inventory[barcode]) {
                     const item = inventory[barcode];
@@ -667,37 +727,33 @@
                 } else {
                     message += ' - Item not found in inventory.';
                 }
-                scannerFeedback.textContent = message;
-                scannerFeedback.classList.remove('hidden', 'error-message');
-                scannerFeedback.classList.add('success-message');
-                setTimeout(() => scannerFeedback.classList.add('hidden'), 3000);
+                showFeedback(elements.scannerFeedback, message, true);
             });
         });
 
-        stopScanner.addEventListener('click', stopScannerFunc);
+        elements.stopScanner.addEventListener('click', stopScannerFunc);
 
-        manualScan.addEventListener('click', () => {
-            const barcode = manualBarcode.value.trim();
-            if (barcode) {
-                let message = `Manual Barcode: ${barcode}`;
-                if (inventory[barcode]) {
-                    const item = inventory[barcode];
-                    message += ` - ${item.name} ($${item.price.toFixed(2)})`;
-                    cart.push({ barcode, ...item });
-                    renderCart();
+        elements.manualScan.addEventListener('click', () => {
+            try {
+                const barcode = elements.manualBarcode.value.trim();
+                if (barcode) {
+                    let message = `Manual Barcode: ${barcode}`;
+                    if (inventory[barcode]) {
+                        const item = inventory[barcode];
+                        message += ` - ${item.name} ($${item.price.toFixed(2)})`;
+                        cart.push({ barcode, ...item });
+                        renderCart();
+                    } else {
+                        message += ' - Item not found in inventory.';
+                    }
+                    elements.manualBarcode.value = '';
+                    showFeedback(elements.scannerFeedback, message, true);
                 } else {
-                    message += ' - Item not found in inventory.';
+                    showFeedback(elements.scannerFeedback, 'Please enter a barcode.', false);
                 }
-                scannerFeedback.textContent = message;
-                scannerFeedback.classList.remove('hidden', 'error-message');
-                scannerFeedback.classList.add('success-message');
-                manualBarcode.value = '';
-                setTimeout(() => scannerFeedback.classList.add('hidden'), 3000);
-            } else {
-                scannerFeedback.textContent = 'Please enter a barcode.';
-                scannerFeedback.classList.remove('hidden', 'success-message');
-                scannerFeedback.classList.add('error-message');
-                setTimeout(() => scannerFeedback.classList.add('hidden'), 3000);
+            } catch (err) {
+                console.error('Error in main scanner manual scan:', err);
+                showFeedback(elements.scannerFeedback, 'Error processing manual barcode.', false);
             }
         });
     </script>
