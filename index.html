@@ -6,135 +6,206 @@
     <title>SuperScan - Premium Inventory & POS</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/quagga@0.12.1/dist/quagga.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body {
-            font-family: 'Poppins', sans-serif;
-            background: linear-gradient(135deg, #1e3a8a 0%, #6b21a8 100%);
-            color: #f5f5f5;
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #2a2a72 0%, #009ffd 100%);
+            color: #ffffff;
             margin: 0;
-            transition: background 0.3s ease, color 0.3s ease;
+            overflow-x: hidden;
+            transition: background 0.5s ease;
         }
         body.light-mode {
-            background: linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%);
+            background: linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 100%);
             color: #1a1a1a;
         }
         .container {
             max-width: 1200px;
             margin: 0 auto;
             padding: 2rem;
+            padding-left: 4rem;
         }
-        .header {
+        .top-bar {
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
-            background: #1a1a1a;
+            background: rgba(10, 10, 10, 0.8);
+            backdrop-filter: blur(10px);
             padding: 1rem 2rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
             z-index: 1000;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
         }
-        .header.light-mode {
-            background: #ffffff;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        .top-bar.light-mode {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
         }
-        .header a {
-            color: #d4af37;
-            margin: 0 1rem;
-            font-weight: 600;
-            transition: color 0.3s ease;
-        }
-        .header a:hover {
-            color: #b8972e;
-        }
-        .header .logo {
+        .top-bar .logo {
             font-size: 1.5rem;
             font-weight: 700;
-            color: #d4af37;
+            color: #00ddeb;
+            transition: color 0.3s ease;
+        }
+        .top-bar.light-mode .logo {
+            color: #2a2a72;
+        }
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: -250px;
+            width: 250px;
+            height: 100%;
+            background: rgba(20, 20, 20, 0.95);
+            backdrop-filter: blur(10px);
+            padding-top: 5rem;
+            transition: left 0.3s ease;
+            z-index: 999;
+        }
+        .sidebar.light-mode {
+            background: rgba(255, 255, 255, 0.95);
+        }
+        .sidebar.open {
+            left: 0;
+        }
+        .sidebar a {
+            display: flex;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            color: #00ddeb;
+            font-weight: 500;
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+        .sidebar.light-mode a {
+            color: #2a2a72;
+        }
+        .sidebar a:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+        }
+        .sidebar.light-mode a:hover {
+            background: rgba(0, 0, 0, 0.1);
+            color: #1a1a1a;
+        }
+        .sidebar .icon {
+            margin-right: 0.75rem;
+            font-size: 1.2rem;
+        }
+        .toggle-sidebar {
+            background: none;
+            border: none;
+            color: #00ddeb;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+        .toggle-sidebar.light-mode {
+            color: #2a2a72;
+        }
+        .toggle-sidebar:hover {
+            color: #ffffff;
         }
         .card {
-            background: #2c2c2c;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-            padding: 1.5rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 2rem;
             margin-bottom: 2rem;
-            transition: transform 0.2s ease, background 0.3s ease;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
         .card.light-mode {
-            background: #ffffff;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            background: rgba(255, 255, 255, 0.7);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
         }
         .card:hover {
             transform: translateY(-5px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
         }
         .btn-primary {
-            background: #d4af37;
+            background: #00ddeb;
             color: #1a1a1a;
             font-weight: 600;
             padding: 0.75rem 1.5rem;
             border-radius: 8px;
-            transition: background 0.3s ease, transform 0.1s ease;
+            border: none;
+            transition: background 0.3s ease, transform 0.1s ease, box-shadow 0.3s ease;
         }
         .btn-primary:hover {
-            background: #b8972e;
+            background: #00b5c2;
             transform: scale(1.05);
+            box-shadow: 0 4px 15px rgba(0, 221, 235, 0.4);
         }
         .btn-secondary {
-            background: #4b4b4b;
-            color: #f5f5f5;
+            background: rgba(255, 255, 255, 0.2);
+            color: #ffffff;
             font-weight: 600;
             padding: 0.75rem 1.5rem;
             border-radius: 8px;
-            transition: background 0.3s ease, transform 0.1s ease;
+            border: none;
+            transition: background 0.3s ease, transform 0.1s ease, box-shadow 0.3s ease;
+        }
+        .btn-secondary.light-mode {
+            background: rgba(0, 0, 0, 0.1);
+            color: #1a1a1a;
         }
         .btn-secondary:hover {
-            background: #3a3a3a;
+            background: rgba(255, 255, 255, 0.3);
             transform: scale(1.05);
+            box-shadow: 0 4px 15px rgba(255, 255, 255, 0.2);
+        }
+        .btn-secondary.light-mode:hover {
+            background: rgba(0, 0, 0, 0.2);
         }
         .btn-danger {
-            background: #dc2626;
+            background: #ff4d4f;
             color: #ffffff;
             font-weight: 600;
             padding: 0.75rem 1.5rem;
             border-radius: 8px;
-            transition: background 0.3s ease, transform 0.1s ease;
+            border: none;
+            transition: background 0.3s ease, transform 0.1s ease, box-shadow 0.3s ease;
         }
         .btn-danger:hover {
-            background: #b91c1c;
+            background: #d93638;
             transform: scale(1.05);
+            box-shadow: 0 4px 15px rgba(255, 77, 79, 0.4);
         }
         .btn-success {
-            background: #10b981;
+            background: #34c759;
             color: #ffffff;
             font-weight: 600;
             padding: 0.75rem 1.5rem;
             border-radius: 8px;
-            transition: background 0.3s ease, transform 0.1s ease;
+            border: none;
+            transition: background 0.3s ease, transform 0.1s ease, box-shadow 0.3s ease;
         }
         .btn-success:hover {
-            background: #059669;
+            background: #2ba848;
             transform: scale(1.05);
+            box-shadow: 0 4px 15px rgba(52, 199, 89, 0.4);
         }
         .scanner-input {
-            border: 2px solid #d4af37;
+            border: 2px solid #00ddeb;
             border-radius: 8px;
             padding: 0.75rem;
-            background: #3a3a3a;
-            color: #f5f5f5;
-            transition: border-color 0.3s ease, background 0.3s ease;
+            background: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            transition: border-color 0.3s ease, background 0.3s ease, box-shadow 0.3s ease;
         }
         .scanner-input.light-mode {
-            background: #f5f5f5;
+            background: rgba(255, 255, 255, 0.5);
             color: #1a1a1a;
-            border: 2px solid #d4af37;
+            border: 2px solid #2a2a72;
         }
         .scanner-input:focus {
-            border-color: #b8972e;
+            border-color: #00b5c2;
             outline: none;
-            box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.2);
+            box-shadow: 0 0 0 3px rgba(0, 221, 235, 0.3);
         }
         .scanner-container {
             position: relative;
@@ -145,7 +216,7 @@
             background: #000;
             border-radius: 8px;
             overflow: hidden;
-            border: 2px solid #d4af37;
+            border: 2px solid #00ddeb;
         }
         .scanner-video {
             width: 100%;
@@ -160,7 +231,7 @@
             transform: translate(-50%, -50%);
             width: 90%;
             height: 60px;
-            border: 3px solid #ef4444;
+            border: 3px solid #ff4d4f;
             background: rgba(255, 255, 255, 0.2);
             pointer-events: none;
         }
@@ -169,32 +240,69 @@
         }
         @keyframes flashGreen {
             0% { background-color: transparent; }
-            50% { background-color: rgba(16, 185, 129, 0.3); }
+            50% { background-color: rgba(52, 199, 89, 0.3); }
             100% { background-color: transparent; }
         }
         .error-message {
-            color: #f87171;
+            color: #ff6b6b;
             font-weight: 500;
         }
         .success-message {
-            color: #34d399;
+            color: #34c759;
             font-weight: 500;
         }
         .receipt {
             background: #ffffff;
-            border: 2px solid #d4af37;
             border-radius: 12px;
-            padding: 20px;
+            padding: 1.5rem;
             max-width: 400px;
             margin: 0 auto;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            font-family: 'Inter', sans-serif;
+            color: #1a1a1a;
+        }
+        .receipt-header {
+            text-align: center;
+            margin-bottom: 1rem;
         }
         .receipt-logo {
             width: 80px;
             height: 80px;
-            margin: 0 auto;
             border-radius: 50%;
             object-fit: cover;
+            margin: 0 auto;
+        }
+        .receipt-footer {
+            text-align: center;
+            margin-top: 1rem;
+            font-size: 0.85rem;
+            color: #666;
+        }
+        .receipt-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+        .receipt-table th,
+        .receipt-table td {
+            padding: 0.5rem;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        .receipt-table th {
+            font-weight: 600;
+            color: #2a2a72;
+        }
+        .receipt-table .total-row {
+            font-weight: 600;
+            border-top: 2px solid #2a2a72;
+        }
+        .barcode {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.9rem;
+            text-align: center;
+            margin-top: 0.5rem;
+            letter-spacing: 2px;
         }
         .logo-preview {
             width: 100px;
@@ -204,11 +312,11 @@
             margin-bottom: 10px;
         }
         .low-stock {
-            background: rgba(220, 38, 38, 0.1);
-            border-left: 4px solid #dc2626;
+            background: rgba(255, 75, 75, 0.1);
+            border-left: 4px solid #ff4d4f;
         }
         .notification {
-            background: #dc2626;
+            background: #ff4d4f;
             color: #ffffff;
             padding: 1rem;
             border-radius: 8px;
@@ -223,26 +331,24 @@
             opacity: 1;
             transform: translateY(0);
         }
-        .login-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-        }
         @media print {
             body {
                 background: #ffffff;
                 color: #000000;
             }
             .receipt {
-                border: none;
                 box-shadow: none;
+                border: none;
             }
             .no-print {
                 display: none;
             }
         }
-        @media (max-width: 640px) {
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+                padding-left: 1rem;
+            }
             .scanner-container {
                 max-width: 100%;
                 height: 240px;
@@ -251,238 +357,236 @@
                 width: 80%;
                 height: 50px;
             }
-            .header {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-            .header a {
-                margin: 0.5rem 0;
+            .grid {
+                grid-template-columns: 1fr !important;
             }
         }
     </style>
 </head>
 <body class="min-h-screen">
-    <!-- Login Page -->
-    <div id="loginPage" class="login-container">
-        <div class="card p-6 w-full max-w-sm">
-            <h2 class="text-2xl font-semibold text-[#d4af37] mb-4 text-center">Login to SuperScan</h2>
-            <p class="text-gray-400 light-mode:text-gray-600 mb-4 text-center">Use the credentials below or update them in Settings.</p>
-            <p class="text-gray-400 light-mode:text-gray-600 mb-4 text-center">Default Username: <span id="defaultUsername">admin</span> | Default Password: <span id="defaultPassword">password123</span></p>
-            <input id="usernameInput" type="text" placeholder="Username" class="scanner-input w-full mb-2">
-            <input id="passwordInput" type="password" placeholder="Password" class="scanner-input w-full mb-4">
-            <button id="loginButton" class="btn-primary w-full">Login</button>
-            <p id="loginError" class="error-message mt-2 text-center hidden"></p>
+    <div class="top-bar">
+        <div class="logo">SuperScan</div>
+        <button class="toggle-sidebar" onclick="toggleSidebar()">☰</button>
+    </div>
+
+    <div class="sidebar" id="sidebar">
+        <a href="#" onclick="showSection('landing'); toggleSidebar(); return false;">
+            <span class="icon">🏠</span>Home
+        </a>
+        <a href="#" onclick="showSection('inventory'); toggleSidebar(); return false;">
+            <span class="icon">📦</span>Inventory
+        </a>
+        <a href="#" onclick="showSection('pos'); toggleSidebar(); return false;">
+            <span class="icon">💰</span>POS
+        </a>
+        <a href="#" onclick="showSection('scanner'); toggleSidebar(); return false;">
+            <span class="icon">📷</span>Scanner
+        </a>
+        <a href="#" onclick="showSection('history'); toggleSidebar(); return false;">
+            <span class="icon">📜</span>History
+        </a>
+        <a href="#" onclick="showSection('settings'); toggleSidebar(); return false;">
+            <span class="icon">⚙️</span>Settings
+        </a>
+        <a href="#" onclick="toggleTheme(); return false;">
+            <span class="icon">🌗</span>Toggle Theme
+        </a>
+    </div>
+
+    <div style="height: 60px;"></div>
+
+    <div id="landingPage" class="container section">
+        <h1 class="text-5xl font-bold text-center text-[#00ddeb] mb-8">SuperScan</h1>
+        <p class="text-center text-gray-200 light-mode:text-gray-700 mb-12 text-lg">Premium Inventory & POS System</p>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <div class="card p-6 text-center cursor-pointer" onclick="showSection('inventory')">
+                <h2 class="text-xl font-semibold text-[#00ddeb] mb-2">Inventory Management</h2>
+                <p class="text-gray-300 light-mode:text-gray-600">Manage your stock with ease.</p>
+            </div>
+            <div class="card p-6 text-center cursor-pointer" onclick="showSection('pos')">
+                <h2 class="text-xl font-semibold text-[#00ddeb] mb-2">Point of Sale</h2>
+                <p class="text-gray-300 light-mode:text-gray-600">Process sales efficiently.</p>
+            </div>
+            <div class="card p-6 text-center cursor-pointer" onclick="showSection('scanner')">
+                <h2 class="text-xl font-semibold text-[#00ddeb] mb-2">Barcode Scanner</h2>
+                <p class="text-gray-300 light-mode:text-gray-600">Scan barcodes seamlessly.</p>
+            </div>
+            <div class="card p-6 text-center cursor-pointer" onclick="showSection('history')">
+                <h2 class="text-xl font-semibold text-[#00ddeb] mb-2">Transaction History</h2>
+                <p class="text-gray-300 light-mode:text-gray-600">View all past transactions.</p>
+            </div>
+            <div class="card p-6 text-center cursor-pointer" onclick="showSection('settings')">
+                <h2 class="text-xl font-semibold text-[#00ddeb] mb-2">Settings</h2>
+                <p class="text-gray-300 light-mode:text-gray-600">Customize your app settings.</p>
+            </div>
         </div>
     </div>
 
-    <header id="appHeader" class="header hidden">
-        <div class="logo">SuperScan</div>
-        <nav>
-            <a href="#" onclick="showSection('landing'); return false;">Home</a>
-            <a href="#" onclick="showSection('inventory'); return false;">Inventory</a>
-            <a href="#" onclick="showSection('pos'); return false;">POS</a>
-            <a href="#" onclick="showSection('scanner'); return false;">Scanner</a>
-            <a href="#" onclick="showSection('history'); return false;">History</a>
-            <a href="#" onclick="showSection('settings'); return false;">Settings</a>
-            <a href="#" onclick="toggleTheme(); return false;">Toggle Theme</a>
-            <a href="#" onclick="logout(); return false;">Logout</a>
-        </nav>
-    </header>
-
-    <div id="appContent" class="hidden">
-        <div style="height: 80px;"></div>
-
-        <div id="landingPage" class="container section">
-            <h1 class="text-5xl font-bold text-center text-[#d4af37] mb-8">SuperScan</h1>
-            <p class="text-center text-gray-300 mb-12 text-lg">Premium Inventory & POS System</p>
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-                <div class="card p-6 text-center cursor-pointer" onclick="showSection('inventory')">
-                    <h2 class="text-xl font-semibold text-[#d4af37] mb-2">Inventory Management</h2>
-                    <p class="text-gray-400 light-mode:text-gray-600">Manage your stock with ease.</p>
-                </div>
-                <div class="card p-6 text-center cursor-pointer" onclick="showSection('pos')">
-                    <h2 class="text-xl font-semibold text-[#d4af37] mb-2">Point of Sale</h2>
-                    <p class="text-gray-400 light-mode:text-gray-600">Process sales efficiently.</p>
-                </div>
-                <div class="card p-6 text-center cursor-pointer" onclick="showSection('scanner')">
-                    <h2 class="text-xl font-semibold text-[#d4af37] mb-2">Barcode Scanner</h2>
-                    <p class="text-gray-400 light-mode:text-gray-600">Scan barcodes seamlessly.</p>
-                </div>
-                <div class="card p-6 text-center cursor-pointer" onclick="showSection('history')">
-                    <h2 class="text-xl font-semibold text-[#d4af37] mb-2">Transaction History</h2>
-                    <p class="text-gray-400 light-mode:text-gray-600">View all past transactions.</p>
-                </div>
-                <div class="card p-6 text-center cursor-pointer" onclick="showSection('settings')">
-                    <h2 class="text-xl font-semibold text-[#d4af37] mb-2">Settings</h2>
-                    <p class="text-gray-400 light-mode:text-gray-600">Customize your app settings.</p>
-                </div>
-            </div>
+    <!-- Inventory Management Section -->
+    <div id="inventorySection" class="container section hidden">
+        <div class="flex justify-between items-center mb-8">
+            <h1 class="text-4xl font-bold text-[#00ddeb]">Inventory Management</h1>
+            <button onclick="showSection('landing')" class="btn-secondary">Back to Menu</button>
         </div>
-
-        <!-- Inventory Management Section -->
-        <div id="inventorySection" class="container section hidden">
-            <div class="flex justify-between items-center mb-8">
-                <h1 class="text-4xl font-bold text-[#d4af37]">Inventory Management</h1>
-                <button onclick="showSection('landing')" class="btn-secondary">Back to Menu</button>
-            </div>
-            <div class="card">
-                <h2 class="text-2xl font-semibold text-[#d4af37] mb-4">Manage Inventory</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <!-- Add/Edit Item -->
-                    <div>
-                        <h3 class="text-lg font-medium text-gray-200 light-mode:text-gray-800 mb-2">Add New Item</h3>
-                        <div class="scanner-container">
-                            <video id="inventoryScannerVideo" class="scanner-video hidden" autoplay muted playsinline></video>
-                            <div id="inventoryScannerOverlay" class="scanner-overlay hidden"></div>
-                        </div>
-                        <p id="inventoryScannerFeedback" class="mt-2 hidden"></p>
-                        <button id="inventoryTestCamera" class="btn-secondary mb-2">Test Camera</button>
-                        <input id="barcodeInput" type="text" placeholder="Scan or Enter Barcode" class="scanner-input w-full mb-2">
-                        <div class="flex gap-2 mb-2">
-                            <button id="inventoryStartScanner" class="btn-primary">Scan Barcode</button>
-                            <button id="inventoryStopScanner" class="btn-danger hidden">Stop Scanner</button>
-                            <button id="inventoryManualScan" class="btn-primary">Submit Manual Barcode</button>
-                        </div>
-                        <input id="itemName" type="text" placeholder="Item Name" class="scanner-input w-full mb-2">
-                        <input id="itemPrice" type="number" step="0.01" placeholder="Price (e.g., 9.99)" class="scanner-input w-full mb-2">
-                        <input id="itemStock" type="number" placeholder="Stock Quantity" class="scanner-input w-full mb-2">
-                        <button id="saveItem" class="btn-primary">Save Item</button>
-                        <button id="editItem" class="btn-primary hidden">Update Item</button>
+        <div class="card">
+            <h2 class="text-2xl font-semibold text-[#00ddeb] mb-4">Manage Inventory</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Add/Edit Item -->
+                <div>
+                    <h3 class="text-lg font-medium text-gray-200 light-mode:text-gray-800 mb-2">Add New Item</h3>
+                    <div class="scanner-container">
+                        <video id="inventoryScannerVideo" class="scanner-video hidden" autoplay muted playsinline></video>
+                        <div id="inventoryScannerOverlay" class="scanner-overlay hidden"></div>
                     </div>
-                    <!-- Item List -->
-                    <div>
-                        <h3 class="text-lg font-medium text-gray-200 light-mode:text-gray-800 mb-2">Inventory</h3>
-                        <button id="viewInventoryBtn" class="btn-primary mb-2">View Inventory</button>
-                        <button id="exportInventoryBtn" class="btn-success mb-2 ml-2">Export Inventory</button>
-                        <input id="inventorySearch" type="text" placeholder="Search by name or barcode..." class="scanner-input w-full mb-2">
-                        <div id="lowStockAlert" class="notification hidden"></div>
-                        <div id="inventoryList" class="max-h-96 overflow-y-auto">
-                            <!-- Items will be dynamically added here -->
-                        </div>
+                    <p id="inventoryScannerFeedback" class="mt-2 hidden"></p>
+                    <button id="inventoryTestCamera" class="btn-secondary mb-2">Test Camera</button>
+                    <input id="barcodeInput" type="text" placeholder="Scan or Enter Barcode" class="scanner-input w-full mb-2">
+                    <div class="flex gap-2 mb-2">
+                        <button id="inventoryStartScanner" class="btn-primary">Scan Barcode</button>
+                        <button id="inventoryStopScanner" class="btn-danger hidden">Stop Scanner</button>
+                        <button id="inventoryManualScan" class="btn-primary">Submit Manual Barcode</button>
+                    </div>
+                    <input id="itemName" type="text" placeholder="Item Name" class="scanner-input w-full mb-2">
+                    <input id="itemPrice" type="number" step="0.01" placeholder="Price (e.g., 9.99)" class="scanner-input w-full mb-2">
+                    <input id="itemStock" type="number" placeholder="Stock Quantity" class="scanner-input w-full mb-2">
+                    <button id="saveItem" class="btn-primary">Save Item</button>
+                    <button id="editItem" class="btn-primary hidden">Update Item</button>
+                </div>
+                <!-- Item List -->
+                <div>
+                    <h3 class="text-lg font-medium text-gray-200 light-mode:text-gray-800 mb-2">Inventory</h3>
+                    <button id="viewInventoryBtn" class="btn-primary mb-2">View Inventory</button>
+                    <button id="exportInventoryBtn" class="btn-success mb-2 ml-2">Export Inventory</button>
+                    <input id="inventorySearch" type="text" placeholder="Search by name or barcode..." class="scanner-input w-full mb-2">
+                    <div id="lowStockAlert" class="notification hidden"></div>
+                    <div id="inventoryList" class="max-h-96 overflow-y-auto">
+                        <!-- Items will be dynamically added here -->
                     </div>
                 </div>
             </div>
         </div>
+    </div>
 
-        <!-- POS Section -->
-        <div id="posSection" class="container section hidden">
-            <div class="flex justify-between items-center mb-8">
-                <h1 class="text-4xl font-bold text-[#d4af37]">Point of Sale</h1>
-                <button onclick="showSection('landing')" class="btn-secondary">Back to Menu</button>
+    <!-- POS Section -->
+    <div id="posSection" class="container section hidden">
+        <div class="flex justify-between items-center mb-8">
+            <h1 class="text-4xl font-bold text-[#00ddeb]">Point of Sale</h1>
+            <button onclick="showSection('landing')" class="btn-secondary">Back to Menu</button>
+        </div>
+        <div class="card">
+            <h2 class="text-2xl font-semibold text-[#00ddeb] mb-4">Point of Sale</h2>
+            <div class="scanner-container">
+                <video id="posScannerVideo" class="scanner-video hidden" autoplay muted playsinline></video>
+                <div id="posScannerOverlay" class="scanner-overlay hidden"></div>
             </div>
-            <div class="card">
-                <h2 class="text-2xl font-semibold text-[#d4af37] mb-4">Point of Sale</h2>
-                <div class="scanner-container">
-                    <video id="posScannerVideo" class="scanner-video hidden" autoplay muted playsinline></video>
-                    <div id="posScannerOverlay" class="scanner-overlay hidden"></div>
+            <p id="posScannerFeedback" class="mt-2 hidden"></p>
+            <button id="posTestCamera" class="btn-secondary mb-2">Test Camera</button>
+            <div class="flex gap-2 mb-2">
+                <input id="posBarcode" type="text" placeholder="Scan or Enter Barcode" class="scanner-input w-full">
+                <input id="posQuantity" type="number" min="1" value="1" placeholder="Quantity" class="scanner-input w-24">
+            </div>
+            <div class="flex gap-2 mb-4">
+                <button id="posStartScanner" class="btn-primary">Scan Barcode</button>
+                <button id="posStopScanner" class="btn-danger hidden">Stop Scanner</button>
+                <button id="posManualScan" class="btn-primary">Submit Manual Barcode</button>
+                <button id="orderFromSaved" class="btn-success">Order from Saved Items</button>
+            </div>
+            <!-- Order from Saved Items Modal -->
+            <div id="orderModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden">
+                <div class="card p-6 w-full max-w-lg">
+                    <h3 class="text-xl font-semibold text-[#00ddeb] mb-4">Order from Saved Items</h3>
+                    <div id="savedItemsList" class="max-h-60 overflow-y-auto mb-4"></div>
+                    <button id="confirmOrder" class="btn-primary w-full">Confirm Order</button>
+                    <button id="closeOrderModal" class="btn-secondary w-full mt-2">Close</button>
                 </div>
-                <p id="posScannerFeedback" class="mt-2 hidden"></p>
-                <button id="posTestCamera" class="btn-secondary mb-2">Test Camera</button>
-                <div class="flex gap-2 mb-2">
-                    <input id="posBarcode" type="text" placeholder="Scan or Enter Barcode" class="scanner-input w-full">
-                    <input id="posQuantity" type="number" min="1" value="1" placeholder="Quantity" class="scanner-input w-24">
-                </div>
-                <div class="flex gap-2 mb-4">
-                    <button id="posStartScanner" class="btn-primary">Scan Barcode</button>
-                    <button id="posStopScanner" class="btn-danger hidden">Stop Scanner</button>
-                    <button id="posManualScan" class="btn-primary">Submit Manual Barcode</button>
-                    <button id="orderFromSaved" class="btn-success">Order from Saved Items</button>
-                </div>
-                <!-- Order from Saved Items Modal -->
-                <div id="orderModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden">
-                    <div class="card p-6 w-full max-w-lg">
-                        <h3 class="text-xl font-semibold text-[#d4af37] mb-4">Order from Saved Items</h3>
-                        <div id="savedItemsList" class="max-h-60 overflow-y-auto mb-4"></div>
-                        <button id="confirmOrder" class="btn-primary w-full">Confirm Order</button>
-                        <button id="closeOrderModal" class="btn-secondary w-full mt-2">Close</button>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Cart -->
+                <div>
+                    <h3 class="text-lg font-medium text-gray-200 light-mode:text-gray-800 mb-2">Cart</h3>
+                    <div id="cartList" class="max-h-96 overflow-y-auto">
+                        <!-- Cart items will be dynamically added here -->
                     </div>
                 </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <!-- Cart -->
-                    <div>
-                        <h3 class="text-lg font-medium text-gray-200 light-mode:text-gray-800 mb-2">Cart</h3>
-                        <div id="cartList" class="max-h-96 overflow-y-auto">
-                            <!-- Cart items will be dynamically added here -->
-                        </div>
-                    </div>
-                    <!-- Summary -->
-                    <div>
-                        <h3 class="text-lg font-medium text-gray-200 light-mode:text-gray-800 mb-2">Summary</h3>
-                        <div class="bg-gray-700 light-mode:bg-gray-50 p-4 rounded-md">
-                            <p class="text-gray-300 light-mode:text-gray-600">Total Items: <span id="totalItems">0</span></p>
-                            <p class="text-gray-300 light-mode:text-gray-600">Total Amount: $<span id="totalAmount">0.00</span></p>
-                            <button id="clearCart" class="btn-danger mt-4">Clear Cart</button>
-                            <button id="printReceipt" class="btn-success mt-4 ml-2">Checkout & Print Receipt</button>
-                        </div>
+                <!-- Summary -->
+                <div>
+                    <h3 class="text-lg font-medium text-gray-200 light-mode:text-gray-800 mb-2">Summary</h3>
+                    <div class="bg-[#ffffff1a] light-mode:bg-[#0000001a] p-4 rounded-md">
+                        <p class="text-gray-300 light-mode:text-gray-600">Total Items: <span id="totalItems">0</span></p>
+                        <p class="text-gray-300 light-mode:text-gray-600">Total Amount: $<span id="totalAmount">0.00</span></p>
+                        <button id="clearCart" class="btn-danger mt-4">Clear Cart</button>
+                        <button id="printReceipt" class="btn-success mt-4 ml-2">Checkout & Print Receipt</button>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
 
-        <!-- Scanner Section -->
-        <div id="scannerSection" class="container section hidden">
-            <div class="flex justify-between items-center mb-8">
-                <h1 class="text-4xl font-bold text-[#d4af37]">Barcode Scanner</h1>
-                <button onclick="showSection('landing')" class="btn-secondary">Back to Menu</button>
+    <!-- Scanner Section -->
+    <div id="scannerSection" class="container section hidden">
+        <div class="flex justify-between items-center mb-8">
+            <h1 class="text-4xl font-bold text-[#00ddeb]">Barcode Scanner</h1>
+            <button onclick="showSection('landing')" class="btn-secondary">Back to Menu</button>
+        </div>
+        <div class="card">
+            <h2 class="text-2xl font-semibold text-[#00ddeb] mb-4">Scan a Barcode</h2>
+            <div class="scanner-container">
+                <video id="scannerVideo" class="scanner-video hidden" autoplay muted playsinline></video>
+                <div id="scannerOverlay" class="scanner-overlay hidden"></div>
             </div>
-            <div class="card">
-                <h2 class="text-2xl font-semibold text-[#d4af37] mb-4">Scan a Barcode</h2>
-                <div class="scanner-container">
-                    <video id="scannerVideo" class="scanner-video hidden" autoplay muted playsinline></video>
-                    <div id="scannerOverlay" class="scanner-overlay hidden"></div>
-                </div>
-                <p id="scannerFeedback" class="mt-2 hidden"></p>
-                <button id="testCamera" class="btn-secondary mb-2">Test Camera</button>
-                <div class="mt-4">
-                    <input id="manualBarcode" type="text" placeholder="Enter barcode manually" class="scanner-input w-full mb-2">
-                    <button id="manualScan" class="btn-primary">Submit Manual Barcode</button>
-                </div>
-                <div class="flex gap-2 mt-4">
-                    <button id="startScanner" class="btn-primary">Start Scanner</button>
-                    <button id="stopScanner" class="btn-danger hidden">Stop Scanner</button>
-                </div>
+            <p id="scannerFeedback" class="mt-2 hidden"></p>
+            <button id="testCamera" class="btn-secondary mb-2">Test Camera</button>
+            <div class="mt-4">
+                <input id="manualBarcode" type="text" placeholder="Enter barcode manually" class="scanner-input w-full mb-2">
+                <button id="manualScan" class="btn-primary">Submit Manual Barcode</button>
+            </div>
+            <div class="flex gap-2 mt-4">
+                <button id="startScanner" class="btn-primary">Start Scanner</button>
+                <button id="stopScanner" class="btn-danger hidden">Stop Scanner</button>
             </div>
         </div>
+    </div>
 
-        <!-- Transaction History Section -->
-        <div id="historySection" class="container section hidden">
-            <div class="flex justify-between items-center mb-8">
-                <h1 class="text-4xl font-bold text-[#d4af37]">Transaction History</h1>
-                <button onclick="showSection('landing')" class="btn-secondary">Back to Menu</button>
-            </div>
-            <div class="card">
-                <h2 class="text-2xl font-semibold text-[#d4af37] mb-4">Past Transactions</h2>
-                <div id="transactionList" class="max-h-[600px] overflow-y-auto">
-                    <!-- Transactions will be dynamically added here -->
-                </div>
+    <!-- Transaction History Section -->
+    <div id="historySection" class="container section hidden">
+        <div class="flex justify-between items-center mb-8">
+            <h1 class="text-4xl font-bold text-[#00ddeb]">Transaction History</h1>
+            <button onclick="showSection('landing')" class="btn-secondary">Back to Menu</button>
+        </div>
+        <div class="card">
+            <h2 class="text-2xl font-semibold text-[#00ddeb] mb-4">Past Transactions</h2>
+            <div id="transactionList" class="max-h-[600px] overflow-y-auto">
+                <!-- Transactions will be dynamically added here -->
             </div>
         </div>
+    </div>
 
-        <!-- Settings Section -->
-        <div id="settingsSection" class="container section hidden">
-            <div class="flex justify-between items-center mb-8">
-                <h1 class="text-4xl font-bold text-[#d4af37]">Settings</h1>
-                <button onclick="showSection('landing')" class="btn-secondary">Back to Menu</button>
+    <!-- Settings Section -->
+    <div id="settingsSection" class="container section hidden">
+        <div class="flex justify-between items-center mb-8">
+            <h1 class="text-4xl font-bold text-[#00ddeb]">Settings</h1>
+            <button onclick="showSection('landing')" class="btn-secondary">Back to Menu</button>
+        </div>
+        <div class="card">
+            <h2 class="text-2xl font-semibold text-[#00ddeb] mb-4">Customize App Settings</h2>
+            <div class="mb-4">
+                <label class="block text-gray-200 light-mode:text-gray-800 mb-2">Company Name</label>
+                <input id="companyName" type="text" placeholder="Enter your company name" class="scanner-input w-full mb-2">
             </div>
-            <div class="card">
-                <h2 class="text-2xl font-semibold text-[#d4af37] mb-4">Customize App Settings</h2>
-                <div class="mb-4">
-                    <h3 class="text-lg font-medium text-gray-200 light-mode:text-gray-800 mb-2">Update Login Credentials</h3>
-                    <input id="newUsername" type="text" placeholder="New Username" class="scanner-input w-full mb-2">
-                    <input id="newPassword" type="password" placeholder="New Password" class="scanner-input w-full mb-2">
-                    <button id="updateCredentials" class="btn-primary">Update Credentials</button>
-                </div>
-                <div class="mb-4">
-                    <label class="block text-gray-200 light-mode:text-gray-800 mb-2">Company Name</label>
-                    <input id="companyName" type="text" placeholder="Enter your company name" class="scanner-input w-full mb-2">
-                </div>
-                <div class="mb-4">
-                    <label class="block text-gray-200 light-mode:text-gray-800 mb-2">Upload Logo</label>
-                    <input id="logoInput" type="file" accept="image/*" class="mb-2">
-                    <div id="logoPreview" class="mt-2"></div>
-                </div>
-                <button id="saveSettings" class="btn-primary">Save Settings</button>
+            <div class="mb-4">
+                <label class="block text-gray-200 light-mode:text-gray-800 mb-2">Contact Info (for Receipt Footer)</label>
+                <input id="contactInfo" type="text" placeholder="e.g., Email or Phone" class="scanner-input w-full mb-2">
             </div>
+            <div class="mb-4">
+                <label class="block text-gray-200 light-mode:text-gray-800 mb-2">Cashier Name</label>
+                <input id="cashierName" type="text" placeholder="Enter cashier name" class="scanner-input w-full mb-2">
+            </div>
+            <div class="mb-4">
+                <label class="block text-gray-200 light-mode:text-gray-800 mb-2">Upload Logo</label>
+                <input id="logoInput" type="file" accept="image/*" class="mb-2">
+                <div id="logoPreview" class="mt-2"></div>
+            </div>
+            <button id="saveSettings" class="btn-primary">Save Settings</button>
         </div>
     </div>
 
@@ -497,32 +601,20 @@
         let mediaStream = null;
         let scanCooldown = false;
         let companyName = localStorage.getItem('companyName') || '';
+        let contactInfo = localStorage.getItem('contactInfo') || '';
+        let cashierName = localStorage.getItem('cashierName') || 'Cashier';
         let logoDataUrl = localStorage.getItem('logoDataUrl') || '';
         let theme = localStorage.getItem('theme') || 'dark';
-        let username = localStorage.getItem('username') || 'admin';
-        let password = localStorage.getItem('password') || 'password123';
-        let isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
 
         // Apply theme on load
         document.body.classList.toggle('light-mode', theme === 'light');
-        document.querySelectorAll('.card, .scanner-input, .header').forEach(el => {
+        document.querySelectorAll('.card, .scanner-input, .top-bar, .sidebar, .sidebar a, .toggle-sidebar').forEach(el => {
             el.classList.toggle('light-mode', theme === 'light');
         });
 
         // DOM Elements
         const elements = {
-            loginPage: document.getElementById('loginPage'),
-            appHeader: document.getElementById('appHeader'),
-            appContent: document.getElementById('appContent'),
-            usernameInput: document.getElementById('usernameInput'),
-            passwordInput: document.getElementById('passwordInput'),
-            loginButton: document.getElementById('loginButton'),
-            loginError: document.getElementById('loginError'),
-            defaultUsername: document.getElementById('defaultUsername'),
-            defaultPassword: document.getElementById('defaultPassword'),
-            newUsername: document.getElementById('newUsername'),
-            newPassword: document.getElementById('newPassword'),
-            updateCredentials: document.getElementById('updateCredentials'),
+            sidebar: document.getElementById('sidebar'),
             landingPage: document.getElementById('landingPage'),
             inventorySection: document.getElementById('inventorySection'),
             posSection: document.getElementById('posSection'),
@@ -576,6 +668,8 @@
             posManualScan: document.getElementById('posManualScan'),
             transactionList: document.getElementById('transactionList'),
             companyName: document.getElementById('companyName'),
+            contactInfo: document.getElementById('contactInfo'),
+            cashierName: document.getElementById('cashierName'),
             logoInput: document.getElementById('logoInput'),
             logoPreview: document.getElementById('logoPreview'),
             saveSettings: document.getElementById('saveSettings')
@@ -583,57 +677,27 @@
 
         // Check DOM elements
         for (const [key, element] of Object.entries(elements)) {
-            if (!element) console.error(`Element ${key} not found in DOM`);
+            if (!element) {
+                console.error(`Element ${key} not found in DOM`);
+            }
         }
 
         // Initialize
         try {
-            elements.defaultUsername.textContent = username;
-            elements.defaultPassword.textContent = password;
-            if (isLoggedIn) {
-                showApp();
-            } else {
-                elements.loginPage.classList.remove('hidden');
-            }
-        } catch (err) {
-            console.error('Initialization error:', err);
-            document.body.innerHTML = '<div class="text-center p-6 text-red-600">Failed to initialize application. Please refresh the page.</div>';
-        }
-
-        // Login Functionality
-        elements.loginButton.addEventListener('click', () => {
-            const inputUsername = elements.usernameInput.value.trim();
-            const inputPassword = elements.passwordInput.value.trim();
-            if (inputUsername === username && inputPassword === password) {
-                isLoggedIn = true;
-                localStorage.setItem('isLoggedIn', 'true');
-                showApp();
-            } else {
-                showFeedback(elements.loginError, 'Invalid username or password.', false);
-            }
-        });
-
-        // Logout Functionality
-        function logout() {
-            isLoggedIn = false;
-            localStorage.setItem('isLoggedIn', 'false');
-            elements.appHeader.classList.add('hidden');
-            elements.appContent.classList.add('hidden');
-            elements.loginPage.classList.remove('hidden');
-            elements.usernameInput.value = '';
-            elements.passwordInput.value = '';
-        }
-
-        // Show App After Login
-        function showApp() {
-            elements.loginPage.classList.add('hidden');
-            elements.appHeader.classList.remove('hidden');
-            elements.appContent.classList.remove('hidden');
             renderInventory();
             renderCart();
             renderTransactionHistory();
             renderSettings();
             showSection('landing');
+            console.log('Page initialized successfully');
+        } catch (err) {
+            console.error('Initialization error:', err);
+            document.body.innerHTML = '<div class="text-center p-6 text-red-600">Failed to initialize application. Please check the console for errors and refresh the page.</div>';
+        }
+
+        // Toggle Sidebar
+        function toggleSidebar() {
+            elements.sidebar.classList.toggle('open');
         }
 
         // Toggle Theme
@@ -641,7 +705,7 @@
             theme = theme === 'dark' ? 'light' : 'dark';
             localStorage.setItem('theme', theme);
             document.body.classList.toggle('light-mode', theme === 'light');
-            document.querySelectorAll('.card, .scanner-input, .header').forEach(el => {
+            document.querySelectorAll('.card, .scanner-input, .top-bar, .sidebar, .sidebar a, .toggle-sidebar').forEach(el => {
                 el.classList.toggle('light-mode', theme === 'light');
             });
         }
@@ -650,8 +714,12 @@
         function showSection(section) {
             try {
                 const sections = [elements.landingPage, elements.inventorySection, elements.posSection, elements.scannerSection, elements.historySection, elements.settingsSection];
-                sections.forEach(s => s.classList.add('hidden'));
-                sections.forEach(s => s.classList.remove('visible'));
+                sections.forEach(s => {
+                    if (s) {
+                        s.classList.add('hidden');
+                        s.classList.remove('visible');
+                    }
+                });
 
                 let targetSection;
                 if (section === 'landing') {
@@ -672,9 +740,14 @@
                     targetSection = elements.settingsSection;
                     stopScannerFunc();
                 }
-                targetSection.classList.remove('hidden');
-                setTimeout(() => targetSection.classList.add('visible'), 10);
-                console.log(`Switched to section: ${section}`);
+
+                if (targetSection) {
+                    targetSection.classList.remove('hidden');
+                    setTimeout(() => targetSection.classList.add('visible'), 10);
+                    console.log(`Switched to section: ${section}`);
+                } else {
+                    console.error(`Target section ${section} not found`);
+                }
             } catch (err) {
                 console.error('Error in showSection:', err);
             }
@@ -696,10 +769,10 @@
                 const ctx = new (window.AudioContext || window.webkitAudioContext)();
                 const oscillator = ctx.createOscillator();
                 oscillator.type = 'sine';
-                oscillator.frequency.setValueAtTime(800, ctx.currentTime); // Frequency in Hz
+                oscillator.frequency.setValueAtTime(800, ctx.currentTime);
                 oscillator.connect(ctx.destination);
                 oscillator.start();
-                oscillator.stop(ctx.currentTime + 0.1); // Beep duration (0.1 seconds)
+                oscillator.stop(ctx.currentTime + 0.1);
             } catch (err) {
                 console.error('Error playing beep sound:', err);
             }
@@ -835,7 +908,7 @@
 
                     if (item.stock < 5) lowStockItems++;
                     const itemCard = document.createElement('div');
-                    itemCard.className = `bg-gray-700 light-mode:bg-gray-50 p-4 rounded-md mb-2 flex justify-between items-center ${item.stock < 5 ? 'low-stock' : ''}`;
+                    itemCard.className = `bg-[#ffffff1a] light-mode:bg-[#0000001a] p-4 rounded-md mb-2 flex justify-between items-center ${item.stock < 5 ? 'low-stock' : ''}`;
                     itemCard.innerHTML = `
                         <div>
                             <p class="font-medium text-gray-200 light-mode:text-gray-800">${item.name}</p>
@@ -844,7 +917,7 @@
                             <p class="text-sm text-gray-400 light-mode:text-gray-600">Stock: ${item.stock}</p>
                         </div>
                         <div>
-                            <button onclick="prepareEdit('${barcode}')" class="text-[#d4af37] hover:text-[#b8972e] mr-2">Edit</button>
+                            <button onclick="prepareEdit('${barcode}')" class="text-[#00ddeb] hover:text-[#00b5c2] mr-2">Edit</button>
                             <button onclick="deleteItem('${barcode}')" class="text-red-500 hover:text-red-600">Delete</button>
                         </div>
                     `;
@@ -927,7 +1000,7 @@
                 for (const barcode in inventory) {
                     const item = inventory[barcode];
                     const itemRow = document.createElement('div');
-                    itemRow.className = 'flex justify-between items-center bg-gray-700 light-mode:bg-gray-50 p-3 rounded-md mb-2';
+                    itemRow.className = 'flex justify-between items-center bg-[#ffffff1a] light-mode:bg-[#0000001a] p-3 rounded-md mb-2';
                     itemRow.innerHTML = `
                         <div>
                             <p class="font-medium text-gray-200 light-mode:text-gray-800">${item.name}</p>
@@ -936,13 +1009,12 @@
                         </div>
                         <div class="flex items-center">
                             <input type="number" min="1" max="${item.stock}" value="1" class="quantity-input w-16 p-1 border rounded-md mr-2" data-barcode="${barcode}">
-                            <button class="add-to-cart-btn text-[#d4af37] hover:text-[#b8972e]" data-barcode="${barcode}">Add</button>
+                            <button class="add-to-cart-btn text-[#00ddeb] hover:text-[#00b5c2]" data-barcode="${barcode}">Add</button>
                         </div>
                     `;
                     elements.savedItemsList.appendChild(itemRow);
                 }
 
-                // Add event listeners to Add buttons
                 document.querySelectorAll('.add-to-cart-btn').forEach(btn => {
                     btn.addEventListener('click', () => {
                         const barcode = btn.dataset.barcode;
@@ -983,7 +1055,7 @@
                     total += itemTotal;
                     totalItems += item.quantity;
                     const cartItem = document.createElement('div');
-                    cartItem.className = 'bg-gray-700 light-mode:bg-gray-50 p-4 rounded-md mb-2 flex justify-between items-center';
+                    cartItem.className = 'bg-[#ffffff1a] light-mode:bg-[#0000001a] p-4 rounded-md mb-2 flex justify-between items-center';
                     cartItem.innerHTML = `
                         <div>
                             <p class="font-medium text-gray-200 light-mode:text-gray-800">${item.name}</p>
@@ -1028,40 +1100,48 @@
 
         // Generate Receipt HTML
         function generateReceipt(transaction, totalItems) {
+            const simpleBarcode = transaction.id.split('').map(c => `|${c}|`).join('');
             return `
                 <div class="receipt">
-                    ${logoDataUrl ? `<img src="${logoDataUrl}" class="receipt-logo" alt="Company Logo">` : '<div class="receipt-logo">No Logo</div>'}
-                    <h2 class="text-2xl font-bold text-center text-gray-800 mt-4">${companyName ? companyName + ' Receipt' : 'Receipt'}</h2>
-                    <p class="text-center text-gray-600 mt-2">Transaction ID: ${transaction.id}</p>
-                    <p class="text-center text-gray-600">Order Number: ${transaction.orderNumber}</p>
-                    <p class="text-center text-gray-600">Date: ${transaction.date}</p>
+                    <div class="receipt-header">
+                        ${logoDataUrl ? `<img src="${logoDataUrl}" class="receipt-logo" alt="Company Logo">` : '<div class="receipt-logo bg-gray-200 flex items-center justify-center text-gray-600">No Logo</div>'}
+                        <h2 class="text-2xl font-bold text-center text-[#2a2a72] mt-4">${companyName || 'SuperScan'}</h2>
+                        <p class="text-center text-gray-600 mt-2">Transaction ID: ${transaction.id}</p>
+                        <p class="text-center text-gray-600">Order Number: ${transaction.orderNumber}</p>
+                        <p class="text-center text-gray-600">Date: ${transaction.date}</p>
+                        <p class="text-center text-gray-600">Cashier: ${cashierName}</p>
+                    </div>
                     <hr class="my-4 border-gray-300">
-                    <table class="w-full mt-4 border-collapse">
+                    <table class="receipt-table">
                         <thead>
-                            <tr class="border-b border-gray-300">
-                                <th class="text-left py-2 text-gray-800">Item</th>
-                                <th class="text-center py-2 text-gray-800">Qty</th>
-                                <th class="text-right py-2 text-gray-800">Price</th>
+                            <tr>
+                                <th class="text-left">Item</th>
+                                <th class="text-center">Qty</th>
+                                <th class="text-right">Price</th>
                             </tr>
                         </thead>
                         <tbody>
                             ${transaction.items.map(item => `
                                 <tr>
-                                    <td class="py-2 text-gray-800">${item.name}</td>
-                                    <td class="text-center py-2 text-gray-800">${item.quantity}</td>
-                                    <td class="text-right py-2 text-gray-800">$${(item.price * item.quantity).toFixed(2)}</td>
+                                    <td>${item.name}</td>
+                                    <td class="text-center">${item.quantity}</td>
+                                    <td class="text-right">$${(item.price * item.quantity).toFixed(2)}</td>
                                 </tr>
                             `).join('')}
                         </tbody>
                         <tfoot>
-                            <tr class="border-t border-gray-300 font-semibold">
-                                <td class="py-2 text-gray-800">Total (${totalItems} items)</td>
+                            <tr class="total-row">
+                                <td>Total (${totalItems} items)</td>
                                 <td></td>
-                                <td class="text-right py-2 text-gray-800">$${transaction.total.toFixed(2)}</td>
+                                <td class="text-right">$${transaction.total.toFixed(2)}</td>
                             </tr>
                         </tfoot>
                     </table>
-                    <p class="text-center text-gray-600 mt-4">Thank you for your purchase!</p>
+                    <div class="barcode">${simpleBarcode}</div>
+                    <div class="receipt-footer">
+                        <p>Thank you for your purchase!</p>
+                        ${contactInfo ? `<p>Contact: ${contactInfo}</p>` : ''}
+                    </div>
                 </div>
             `;
         }
@@ -1173,7 +1253,7 @@
                 transactions.forEach((transaction, index) => {
                     const totalItems = transaction.items.reduce((sum, item) => sum + item.quantity, 0);
                     const transactionCard = document.createElement('div');
-                    transactionCard.className = 'bg-gray-700 light-mode:bg-gray-50 p-4 rounded-md mb-4';
+                    transactionCard.className = 'bg-[#ffffff1a] light-mode:bg-[#0000001a] p-4 rounded-md mb-4';
                     let itemsHtml = '';
                     transaction.items.forEach(item => {
                         itemsHtml += `<p class="text-sm text-gray-400 light-mode:text-gray-600">${item.name} - $${item.price.toFixed(2)} x ${item.quantity}</p>`;
@@ -1215,8 +1295,8 @@
         function renderSettings() {
             try {
                 elements.companyName.value = companyName;
-                elements.newUsername.value = username;
-                elements.newPassword.value = password;
+                elements.contactInfo.value = contactInfo;
+                elements.cashierName.value = cashierName;
                 if (logoDataUrl) {
                     const img = document.createElement('img');
                     img.src = logoDataUrl;
@@ -1229,30 +1309,7 @@
             }
         }
 
-        // Update Credentials
-        elements.updateCredentials.addEventListener('click', () => {
-            try {
-                const newUsername = elements.newUsername.value.trim();
-                const newPassword = elements.newPassword.value.trim();
-                if (newUsername && newPassword) {
-                    username = newUsername;
-                    password = newPassword;
-                    localStorage.setItem('username', username);
-                    localStorage.setItem('password', password);
-                    elements.defaultUsername.textContent = username;
-                    elements.defaultPassword.textContent = password;
-                    alert('Credentials updated successfully! Please log in again.');
-                    logout();
-                } else {
-                    alert('Please enter a valid username and password.');
-                }
-            } catch (err) {
-                console.error('Error updating credentials:', err);
-                alert('Error updating credentials. Please try again.');
-            }
-        });
-
-        // Handle Logo Upload and Company Name
+        // Handle Logo Upload and Settings
         elements.logoInput.addEventListener('change', (event) => {
             try {
                 const file = event.target.files[0];
@@ -1276,7 +1333,11 @@
         elements.saveSettings.addEventListener('click', () => {
             try {
                 companyName = elements.companyName.value.trim();
+                contactInfo = elements.contactInfo.value.trim();
+                cashierName = elements.cashierName.value.trim() || 'Cashier';
                 localStorage.setItem('companyName', companyName);
+                localStorage.setItem('contactInfo', contactInfo);
+                localStorage.setItem('cashierName', cashierName);
                 localStorage.setItem('logoDataUrl', logoDataUrl);
                 renderSettings();
                 alert('Settings saved successfully!');
@@ -1409,7 +1470,7 @@
                     });
 
                     Quagga.onDetected(function(data) {
-                        if (scanCooldown) return; // Prevent multiple scans during cooldown
+                        if (scanCooldown) return;
 
                         try {
                             const barcode = data.codeResult.code;
@@ -1417,6 +1478,8 @@
                             showFeedback(feedbackElement, `Scanned: ${barcode}`, true);
                             playBeep();
                             videoElement.classList.add('scanner-success');
+                            setTimeout(() => videoElement.classList.remove('scanner-success'), 500);
+
                             if (section === 'pos') {
                                 const quantity = parseInt(elements.posQuantity.value) || 1;
                                 callback(barcode, quantity);
@@ -1424,11 +1487,10 @@
                                 callback(barcode);
                             }
 
-                            // Set cooldown to prevent immediate re-scan
                             scanCooldown = true;
                             setTimeout(() => {
                                 scanCooldown = false;
-                            }, 2000); // 2-second cooldown
+                            }, 2000);
                         } catch (detectErr) {
                             console.error(`Error processing detected barcode (${section}):`, detectErr);
                             showFeedback(feedbackElement, 'Error processing barcode. Please try again.', false);
@@ -1499,18 +1561,52 @@
             testCamera('scanner', elements.scannerVideo, elements.scannerOverlay, elements.scannerFeedback);
         });
 
-        // Inventory Scanner
+        // Start Scanner Buttons
         elements.inventoryStartScanner.addEventListener('click', () => {
             startScanner('inventory', elements.inventoryScannerVideo, elements.inventoryScannerOverlay, elements.inventoryScannerFeedback, elements.inventoryStartScanner, elements.inventoryStopScanner, (barcode) => {
                 elements.barcodeInput.value = barcode;
-                showFeedback(elements.inventoryScannerFeedback, `Confirmed barcode: ${barcode}`, true);
             });
         });
 
-        elements.inventoryStopScanner.addEventListener('click', stopScannerFunc);
+        elements.posStartScanner.addEventListener('click', () => {
+            startScanner('pos', elements.posScannerVideo, elements.posScannerOverlay, elements.posScannerFeedback, elements.posStartScanner, elements.posStopScanner, addToCart);
+        });
 
+        elements.startScanner.addEventListener('click', () => {
+            startScanner('scanner', elements.scannerVideo, elements.scannerOverlay, elements.scannerFeedback, elements.startScanner, elements.stopScanner, (barcode) => {
+                elements.manualBarcode.value = barcode;
+            });
+        });
+
+        // Stop Scanner Buttons
+        elements.inventoryStopScanner.addEventListener('click', stopScannerFunc);
+        elements.posStopScanner.addEventListener('click', stopScannerFunc);
+        elements.stopScanner.addEventListener('click', stopScannerFunc);
+
+        // Manual Scan Buttons
         elements.inventoryManualScan.addEventListener('click', () => {
-            try {
-                const barcode = elements.barcodeInput.value.trim();
-                if (barcode) {
-                    elements
+            const barcode = elements.barcodeInput.value.trim();
+            if (barcode) {
+                elements.barcodeInput.value = barcode;
+                showFeedback(elements.inventoryScannerFeedback, `Manual barcode entered: ${barcode}`, true);
+            } else {
+                showFeedback(elements.inventoryScannerFeedback, 'Please enter a barcode.', false);
+            }
+        });
+
+        elements.manualScan.addEventListener('click', () => {
+            const barcode = elements.manualBarcode.value.trim();
+            if (barcode) {
+                showFeedback(elements.scannerFeedback, `Manual barcode entered: ${barcode}`, true);
+            } else {
+                showFeedback(elements.scannerFeedback, 'Please enter a barcode.', false);
+            }
+        });
+
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', () => {
+            stopScannerFunc();
+        });
+    </script>
+</body>
+</html> 
