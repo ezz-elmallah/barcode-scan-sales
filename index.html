@@ -8,54 +8,57 @@
     <script src="https://cdn.jsdelivr.net/npm/quagga@0.12.1/dist/quagga.min.js"></script>
     <style>
         body {
-_beast: 0px 0px 0px 0px transparent;
-        font-family: 'Inter', sans-serif;
-    }
-    .scanner-input {
-        border: 2px solid #3b82f6;
-        transition: all 0.3s ease;
-    }
-    .scanner-input:focus {
-        border-color: #1d4ed8;
-        box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.2);
-    }
-    .item-card {
-        transition: transform 0.2s ease;
-    }
-    .item-card:hover {
-        transform: translateY(-2px);
-    }
-    #receipt {
-        display: none;
-    }
-    #scanner-container {
-        position: relative;
-        width: 100%;
-        max-width: 640px;
-        margin: 0 auto;
-    }
-    #scanner-video {
-        width: 100%;
-        height: auto;
-        border-radius: 8px;
-        border: 2px solid #3b82f6;
-    }
-    @media print {
-        #receipt {
-            display: block;
+            font-family: 'Inter', sans-serif;
         }
-        .no-print {
+        .scanner-input {
+            border: 2px solid #3b82f6;
+            transition: all 0.3s ease;
+        }
+        .scanner-input:focus {
+            border-color: #1d4ed8;
+            box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.2);
+        }
+        .item-card {
+            transition: transform 0.2s ease;
+        }
+        .item-card:hover {
+            transform: translateY(-2px);
+        }
+        #receipt {
             display: none;
         }
-    }
-    .mode-card {
-        transition: all 0.3s ease;
-    }
-    .mode-card:hover {
-        transform: scale(1.05);
-        box-shadow: 0 10px 15px rgba(0, 0, 0, 0.2);
-    }
-</style>
+        #scanner-container {
+            position: relative;
+            width: 100%;
+            max-width: 640px;
+            margin: 0 auto;
+        }
+        #scanner-video {
+            width: 100%;
+            height: auto;
+            border-radius: 8px;
+            border: 2px solid #3b82f6;
+        }
+        @media print {
+            #receipt {
+                display: block;
+            }
+            .no-print {
+                display: none;
+            }
+        }
+        .mode-card {
+            transition: all 0.3s ease;
+        }
+        .mode-card:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.2);
+        }
+        .error-message {
+            color: #dc2626;
+            font-weight: 500;
+        }
+    </style>
 </head>
 <body class="bg-gray-100 min-h-screen">
     <div id="landingPage" class="container mx-auto p-6 max-w-7xl">
@@ -148,6 +151,11 @@ _beast: 0px 0px 0px 0px transparent;
             <div id="scanner-container">
                 <video id="scanner-video" autoplay muted playsinline></video>
             </div>
+            <p id="scannerError" class="error-message mt-4 hidden"></p>
+            <div class="mt-4">
+                <input id="manualBarcode" type="text" placeholder="Enter barcode manually" class="scanner-input w-full p-2 rounded-md mb-2">
+                <button id="manualScan" class="bg-purple-500 text-white px-4 py-2 rounded-md hover:bg-purple-600 transition">Submit Manual Barcode</button>
+            </div>
             <button id="startScanner" class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition mt-4">Start Scanner</button>
             <button id="stopScanner" class="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 transition mt-4 ml-2 hidden">Stop Scanner</button>
             <p id="scannerResult" class="text-gray-600 mt-4"></p>
@@ -204,10 +212,14 @@ _beast: 0px 0px 0px 0px transparent;
         const startScanner = document.getElementById('startScanner');
         const stopScanner = document.getElementById('stopScanner');
         const scannerResult = document.getElementById('scannerResult');
+        const scannerError = document.getElementById('scannerError');
+        const manualBarcode = document.getElementById('manualBarcode');
+        const manualScan = document.getElementById('manualScan');
 
         // Initialize
         renderInventory();
         renderCart();
+        console.log('Page loaded successfully');
 
         // Show Section
         function showSection(section) {
@@ -377,61 +389,120 @@ _beast: 0px 0px 0px 0px transparent;
             window.print();
         });
 
-        // Barcode Scanner
-        startScanner.addEventListener('click', () => {
-            if (!scannerActive) {
-                Quagga.init({
-                    inputStream: {
-                        name: "Live",
-                        type: "LiveStream",
-                        target: document.querySelector('#scanner-video'),
-                        constraints: {
-                            facingMode: "environment"
-                        }
-                    },
-                    decoder: {
-                        readers: ["ean_reader", "upc_reader", "code_128_reader"]
-                    }
-                }, function(err) {
-                    if (err) {
-                        console.error(err);
-                        scannerResult.textContent = "Error initializing scanner. Please try again.";
-                        return;
-                    }
-                    Quagga.start();
-                    scannerActive = true;
-                    startScanner.classList.add('hidden');
-                    stopScanner.classList.remove('hidden');
-                });
+        // Check Camera Permission
+        async function checkCameraPermission() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+                stream.getTracks().forEach(track => track.stop());
+                return true;
+            } catch (err) {
+                console.error('Camera permission error:', err);
+                scannerError.textContent = 'Camera access denied. Please allow camera access or use manual input.';
+                scannerError.classList.remove('hidden');
+                return false;
+            }
+        }
 
-                Quagga.onDetected(function(data) {
-                    const barcode = data.codeResult.code;
-                    scannerResult.textContent = `Scanned Barcode: ${barcode}`;
-                    if (inventory[barcode]) {
-                        const item = inventory[barcode];
-                        scannerResult.textContent += ` - ${item.name} ($${item.price.toFixed(2)})`;
-                        cart.push({ barcode, ...item });
-                        renderCart();
-                    } else {
-                        scannerResult.textContent += " - Item not found in inventory.";
-                    }
-                    stopScannerFunc();
-                });
+        // Barcode Scanner
+        startScanner.addEventListener('click', async () => {
+            if (!scannerActive) {
+                const hasPermission = await checkCameraPermission();
+                if (!hasPermission) return;
+
+                try {
+                    Quagga.init({
+                        inputStream: {
+                            name: "Live",
+                            type: "LiveStream",
+                            target: document.querySelector('#scanner-video'),
+                            constraints: {
+                                facingMode: "environment",
+                                width: { ideal: 640 },
+                                height: { ideal: 480 }
+                            }
+                        },
+                        decoder: {
+                            readers: ["ean_reader", "upc_reader", "code_128_reader"]
+                        },
+                        locate: true
+                    }, function(err) {
+                        if (err) {
+                            console.error('Quagga init error:', err);
+                            scannerError.textContent = 'Failed to initialize scanner. Please try again or use manual input.';
+                            scannerError.classList.remove('hidden');
+                            return;
+                        }
+                        Quagga.start();
+                        scannerActive = true;
+                        startScanner.classList.add('hidden');
+                        stopScanner.classList.remove('hidden');
+                        scannerError.classList.add('hidden');
+                        console.log('Scanner started');
+                    });
+
+                    Quagga.onDetected(function(data) {
+                        const barcode = data.codeResult.code;
+                        let message = `Scanned Barcode: ${barcode}`;
+                        if (inventory[barcode]) {
+                            const item = inventory[barcode];
+                            message += ` - ${item.name} ($${item.price.toFixed(2)})`;
+                            cart.push({ barcode, ...item });
+                            renderCart();
+                        } else {
+                            message += ' - Item not found in inventory.';
+                        }
+                        scannerResult.textContent = message;
+                        stopScannerFunc();
+                    });
+                } catch (err) {
+                    console.error('Scanner startup error:', err);
+                    scannerError.textContent = 'Error starting scanner. Please try again or use manual input.';
+                    scannerError.classList.remove('hidden');
+                }
             }
         });
 
         // Stop Scanner
         function stopScannerFunc() {
             if (scannerActive) {
-                Quagga.stop();
-                scannerActive = false;
-                startScanner.classList.remove('hidden');
-                stopScanner.classList.add('hidden');
-                scannerResult.textContent = '';
+                try {
+                    Quagga.stop();
+                    scannerActive = false;
+                    startScanner.classList.remove('hidden');
+                    stopScanner.classList.add('hidden');
+                    scannerResult.textContent = '';
+                    scannerError.classList.add('hidden');
+                    console.log('Scanner stopped');
+                } catch (err) {
+                    console.error('Error stopping scanner:', err);
+                    scannerError.textContent = 'Error stopping scanner. Please refresh the page.';
+                    scannerError.classList.remove('hidden');
+                }
             }
         }
 
         stopScanner.addEventListener('click', stopScannerFunc);
+
+        // Manual Barcode Scan
+        manualScan.addEventListener('click', () => {
+            const barcode = manualBarcode.value.trim();
+            if (barcode) {
+                let message = `Manual Barcode: ${barcode}`;
+                if (inventory[barcode]) {
+                    const item = inventory[barcode];
+                    message += ` - ${item.name} ($${item.price.toFixed(2)})`;
+                    cart.push({ barcode, ...item });
+                    renderCart();
+                } else {
+                    message += ' - Item not found in inventory.';
+                }
+                scannerResult.textContent = message;
+                manualBarcode.value = '';
+                scannerError.classList.add('hidden');
+            } else {
+                alert('Please enter a barcode.');
+            }
+        });
     </script>
 </body>
 </html>
