@@ -32,12 +32,14 @@
             width: 100%;
             max-width: 640px;
             margin: 0 auto;
+            aspect-ratio: 4 / 3;
         }
         .scanner-video {
             width: 100%;
-            height: auto;
+            height: 100%;
             border-radius: 8px;
             border: 2px solid #3b82f6;
+            object-fit: cover;
         }
         .scanner-overlay {
             position: absolute;
@@ -45,9 +47,9 @@
             left: 50%;
             transform: translate(-50%, -50%);
             width: 80%;
-            height: 100px;
-            border: 2px dashed #10b981;
-            background: rgba(255, 255, 255, 0.2);
+            height: 80px;
+            border: 3px dashed #10b981;
+            background: rgba(255, 255, 255, 0.3);
             pointer-events: none;
         }
         .scanner-success {
@@ -116,7 +118,7 @@
                 <div>
                     <h3 class="text-lg font-medium text-gray-600 mb-2">Add New Item</h3>
                     <div class="scanner-container">
-                        <video id="inventoryScannerVideo" class="scanner-video hidden"></video>
+                        <video id="inventoryScannerVideo" class="scanner-video hidden" autoplay muted playsinline></video>
                         <div id="inventoryScannerOverlay" class="scanner-overlay hidden"></div>
                     </div>
                     <p id="inventoryScannerFeedback" class="mt-2 hidden"></p>
@@ -151,7 +153,7 @@
         <div class="bg-white rounded-lg shadow-lg p-6">
             <h2 class="text-2xl font-semibold text-gray-700 mb-4">Point of Sale</h2>
             <div class="scanner-container">
-                <video id="posScannerVideo" class="scanner-video hidden"></video>
+                <video id="posScannerVideo" class="scanner-video hidden" autoplay muted playsinline></video>
                 <div id="posScannerOverlay" class="scanner-overlay hidden"></div>
             </div>
             <p id="posScannerFeedback" class="mt-2 hidden"></p>
@@ -192,7 +194,7 @@
         <div class="bg-white rounded-lg shadow-lg p-6">
             <h2 class="text-2xl font-semibold text-gray-700 mb-4">Scan a Barcode</h2>
             <div class="scanner-container">
-                <video id="scannerVideo" class="scanner-video hidden"></video>
+                <video id="scannerVideo" class="scanner-video hidden" autoplay muted playsinline></video>
                 <div id="scannerOverlay" class="scanner-overlay hidden"></div>
             </div>
             <p id="scannerFeedback" class="mt-2 hidden"></p>
@@ -275,11 +277,9 @@
             posManualScan: document.getElementById('posManualScan')
         };
 
-        // Check if all elements are loaded
+        // Check DOM elements
         for (const [key, element] of Object.entries(elements)) {
-            if (!element) {
-                console.error(`Element ${key} not found in DOM`);
-            }
+            if (!element) console.error(`Element ${key} not found in DOM`);
         }
 
         // Initialize
@@ -550,8 +550,12 @@
         // Check Camera Permission
         async function checkCameraPermission(feedbackElement) {
             try {
+                if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                    throw new Error('MediaDevices API not supported');
+                }
                 const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
                 stream.getTracks().forEach(track => track.stop());
+                console.log('Camera permission granted');
                 return true;
             } catch (err) {
                 console.error('Camera permission error:', err);
@@ -572,6 +576,12 @@
                 checkCameraPermission(feedbackElement).then(hasPermission => {
                     if (!hasPermission) return;
 
+                    if (!window.Quagga) {
+                        console.error('QuaggaJS not loaded');
+                        showFeedback(feedbackElement, 'Scanner library failed to load. Please refresh the page.', false);
+                        return;
+                    }
+
                     Quagga.init({
                         inputStream: {
                             name: "Live",
@@ -590,7 +600,7 @@
                     }, function(err) {
                         if (err) {
                             console.error(`Quagga init error (${section}):`, err);
-                            showFeedback(feedbackElement, 'Failed to initialize scanner. Please try again or use manual input.', false);
+                            showFeedback(feedbackElement, `Failed to initialize scanner: ${err.message}. Please try again.`, false);
                             return;
                         }
                         try {
@@ -632,7 +642,9 @@
             if (!scannerActive) return;
 
             try {
-                Quagga.stop();
+                if (window.Quagga) {
+                    Quagga.stop();
+                }
                 scannerActive = false;
                 if (currentScannerSection === 'inventory') {
                     elements.inventoryScannerVideo.classList.add('hidden');
