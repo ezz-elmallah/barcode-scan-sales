@@ -460,7 +460,7 @@
                     <input id="inventorySearch" type="text" placeholder="Search by name or barcode..." class="scanner-input w-full mb-2">
                     <div id="lowStockAlert" class="notification hidden"></div>
                     <div id="inventoryList" class="max-h-96 overflow-y-auto">
-                        <!-- Items will be dynamically added here -->
+                        <!-- Inventory items will be dynamically added here -->
                     </div>
                 </div>
             </div>
@@ -1098,54 +1098,6 @@
             }
         });
 
-        // Generate Receipt HTML
-        function generateReceipt(transaction, totalItems) {
-            const simpleBarcode = transaction.id.split('').map(c => `|${c}|`).join('');
-            return `
-                <div class="receipt">
-                    <div class="receipt-header">
-                        ${logoDataUrl ? `<img src="${logoDataUrl}" class="receipt-logo" alt="Company Logo">` : '<div class="receipt-logo bg-gray-200 flex items-center justify-center text-gray-600">No Logo</div>'}
-                        <h2 class="text-2xl font-bold text-center text-[#2a2a72] mt-4">${companyName || 'SuperScan'}</h2>
-                        <p class="text-center text-gray-600 mt-2">Transaction ID: ${transaction.id}</p>
-                        <p class="text-center text-gray-600">Order Number: ${transaction.orderNumber}</p>
-                        <p class="text-center text-gray-600">Date: ${transaction.date}</p>
-                        <p class="text-center text-gray-600">Cashier: ${cashierName}</p>
-                    </div>
-                    <hr class="my-4 border-gray-300">
-                    <table class="receipt-table">
-                        <thead>
-                            <tr>
-                                <th class="text-left">Item</th>
-                                <th class="text-center">Qty</th>
-                                <th class="text-right">Price</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${transaction.items.map(item => `
-                                <tr>
-                                    <td>${item.name}</td>
-                                    <td class="text-center">${item.quantity}</td>
-                                    <td class="text-right">$${(item.price * item.quantity).toFixed(2)}</td>
-                                </tr>
-                            `).join('')}
-                        </tbody>
-                        <tfoot>
-                            <tr class="total-row">
-                                <td>Total (${totalItems} items)</td>
-                                <td></td>
-                                <td class="text-right">$${transaction.total.toFixed(2)}</td>
-                            </tr>
-                        </tfoot>
-                    </table>
-                    <div class="barcode">${simpleBarcode}</div>
-                    <div class="receipt-footer">
-                        <p>Thank you for your purchase!</p>
-                        ${contactInfo ? `<p>Contact: ${contactInfo}</p>` : ''}
-                    </div>
-                </div>
-            `;
-        }
-
         // Checkout & Print Receipt
         elements.printReceipt.addEventListener('click', () => {
             try {
@@ -1178,21 +1130,11 @@
                 localStorage.setItem('transactions', JSON.stringify(transactions));
                 renderTransactionHistory();
 
-                // Create receipt dynamically
-                const receiptDiv = document.createElement('div');
-                receiptDiv.className = 'no-print';
-                receiptDiv.innerHTML = generateReceipt(transaction, totalItems);
-                document.body.appendChild(receiptDiv);
+                // Open receipt in a new tab
+                const transactionData = encodeURIComponent(JSON.stringify(transaction));
+                window.open(`receipt.html?transaction=${transactionData}`, '_blank');
 
-                // Print receipt
-                window.print();
-
-                // Remove receipt from DOM after printing
-                setTimeout(() => {
-                    document.body.removeChild(receiptDiv);
-                }, 1000);
-
-                // Clear cart after printing
+                // Clear cart
                 cart = [];
                 renderCart();
             } catch (err) {
@@ -1229,17 +1171,8 @@
         function printTransactionReceipt(index) {
             try {
                 const transaction = transactions[index];
-                const totalItems = transaction.items.reduce((sum, item) => sum + item.quantity, 0);
-                const receiptDiv = document.createElement('div');
-                receiptDiv.className = 'no-print';
-                receiptDiv.innerHTML = generateReceipt(transaction, totalItems);
-                document.body.appendChild(receiptDiv);
-
-                window.print();
-
-                setTimeout(() => {
-                    document.body.removeChild(receiptDiv);
-                }, 1000);
+                const transactionData = encodeURIComponent(JSON.stringify(transaction));
+                window.open(`receipt.html?transaction=${transactionData}`, '_blank');
             } catch (err) {
                 console.error('Error printing transaction receipt:', err);
                 alert('Error printing receipt.');
@@ -1583,30 +1516,72 @@
         elements.posStopScanner.addEventListener('click', stopScannerFunc);
         elements.stopScanner.addEventListener('click', stopScannerFunc);
 
-        // Manual Scan Buttons
+        // Manual Barcode Submission for Inventory
         elements.inventoryManualScan.addEventListener('click', () => {
-            const barcode = elements.barcodeInput.value.trim();
-            if (barcode) {
-                elements.barcodeInput.value = barcode;
-                showFeedback(elements.inventoryScannerFeedback, `Manual barcode entered: ${barcode}`, true);
-            } else {
-                showFeedback(elements.inventoryScannerFeedback, 'Please enter a barcode.', false);
+            try {
+                const barcode = elements.barcodeInput.value.trim();
+                if (barcode) {
+                    if (inventory[barcode]) {
+                        showFeedback(elements.inventoryScannerFeedback, `Barcode ${barcode} already exists. You can edit it below.`, true);
+                        prepareEdit(barcode);
+                    } else {
+                        showFeedback(elements.inventoryScannerFeedback, `Barcode ${barcode} scanned manually. Fill in the details below.`, true);
+                    }
+                } else {
+                    showFeedback(elements.inventoryScannerFeedback, 'Please enter a barcode.', false);
+                }
+            } catch (err) {
+                console.error('Error in inventory manual scan:', err);
+                showFeedback(elements.inventoryScannerFeedback, 'Error processing manual barcode.', false);
             }
         });
 
+        // Manual Barcode Submission for Scanner Section
         elements.manualScan.addEventListener('click', () => {
-            const barcode = elements.manualBarcode.value.trim();
-            if (barcode) {
-                showFeedback(elements.scannerFeedback, `Manual barcode entered: ${barcode}`, true);
-            } else {
-                showFeedback(elements.scannerFeedback, 'Please enter a barcode.', false);
+            try {
+                const barcode = elements.manualBarcode.value.trim();
+                if (barcode) {
+                    showFeedback(elements.scannerFeedback, `Manual barcode submitted: ${barcode}`, true);
+                    playBeep();
+                    if (inventory[barcode]) {
+                        showFeedback(elements.scannerFeedback, `Found in inventory: ${inventory[barcode].name} - $${inventory[barcode].price.toFixed(2)}`, true);
+                    } else {
+                        showFeedback(elements.scannerFeedback, 'Item not found in inventory.', false);
+                    }
+                } else {
+                    showFeedback(elements.scannerFeedback, 'Please enter a barcode.', false);
+                }
+            } catch (err) {
+                console.error('Error in scanner manual scan:', err);
+                showFeedback(elements.scannerFeedback, 'Error processing manual barcode.', false);
             }
         });
 
-        // Cleanup on page unload
+        // Handle Keyboard Input for POS Barcode
+        elements.posBarcode.addEventListener('keypress', (event) => {
+            if (event.key === 'Enter') {
+                elements.posManualScan.click();
+            }
+        });
+
+        // Handle Keyboard Input for Inventory Barcode
+        elements.barcodeInput.addEventListener('keypress', (event) => {
+            if (event.key === 'Enter') {
+                elements.inventoryManualScan.click();
+            }
+        });
+
+        // Handle Keyboard Input for Scanner Section
+        elements.manualBarcode.addEventListener('keypress', (event) => {
+            if (event.key === 'Enter') {
+                elements.manualScan.click();
+            }
+        });
+
+        // Cleanup on Page Unload
         window.addEventListener('beforeunload', () => {
             stopScannerFunc();
         });
     </script>
 </body>
-</html> 
+</html>
