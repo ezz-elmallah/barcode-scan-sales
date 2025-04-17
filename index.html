@@ -3,29 +3,84 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SuperScan - Barcode Inventory & POS</title>
+    <title>SuperScan - Premium Inventory & POS</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/quagga@0.12.1/dist/quagga.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body {
-            font-family: 'Inter', sans-serif;
+            font-family: 'Montserrat', sans-serif;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2c2c2c 100%);
+            color: #f5f5f5;
         }
-        .scanner-input {
-            border: 2px solid #3b82f6;
-            transition: all 0.3s ease;
+        .container {
+            max-width: 1200px;
         }
-        .scanner-input:focus {
-            border-color: #1d4ed8;
-            box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.2);
-        }
-        .item-card {
+        .card {
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
             transition: transform 0.2s ease;
         }
-        .item-card:hover {
-            transform: translateY(-2px);
+        .card:hover {
+            transform: translateY(-3px);
         }
-        #receipt {
-            display: none;
+        .btn-primary {
+            background: #d4af37;
+            color: #1a1a1a;
+            font-weight: 600;
+            padding: 10px 20px;
+            border-radius: 8px;
+            transition: background 0.3s ease;
+        }
+        .btn-primary:hover {
+            background: #b8972e;
+        }
+        .btn-secondary {
+            background: #4b4b4b;
+            color: #f5f5f5;
+            font-weight: 600;
+            padding: 10px 20px;
+            border-radius: 8px;
+            transition: background 0.3s ease;
+        }
+        .btn-secondary:hover {
+            background: #3a3a3a;
+        }
+        .btn-danger {
+            background: #dc2626;
+            color: #ffffff;
+            font-weight: 600;
+            padding: 10px 20px;
+            border-radius: 8px;
+            transition: background 0.3s ease;
+        }
+        .btn-danger:hover {
+            background: #b91c1c;
+        }
+        .btn-success {
+            background: #10b981;
+            color: #ffffff;
+            font-weight: 600;
+            padding: 10px 20px;
+            border-radius: 8px;
+            transition: background 0.3s ease;
+        }
+        .btn-success:hover {
+            background: #059669;
+        }
+        .scanner-input {
+            border: 2px solid #d4af37;
+            border-radius: 8px;
+            padding: 10px;
+            background: #2c2c2c;
+            color: #f5f5f5;
+            transition: border-color 0.3s ease;
+        }
+        .scanner-input:focus {
+            border-color: #b8972e;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.2);
         }
         .scanner-container {
             position: relative;
@@ -36,6 +91,7 @@
             background: #000;
             border-radius: 8px;
             overflow: hidden;
+            border: 2px solid #d4af37;
         }
         .scanner-video {
             width: 100%;
@@ -62,39 +118,58 @@
             50% { background-color: rgba(16, 185, 129, 0.3); }
             100% { background-color: transparent; }
         }
+        .error-message {
+            color: #f87171;
+            font-weight: 500;
+        }
+        .success-message {
+            color: #34d399;
+            font-weight: 500;
+        }
+        .done-button {
+            background: #14b8a6;
+            color: white;
+            font-weight: 600;
+            padding: 10px 20px;
+            border-radius: 8px;
+            transition: background 0.3s ease;
+        }
+        .done-button:hover {
+            background: #0d9488;
+        }
+        .receipt {
+            background: #ffffff;
+            border: 2px solid #d4af37;
+            border-radius: 12px;
+            padding: 20px;
+            max-width: 400px;
+            margin: 0 auto;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+        .receipt-logo {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto;
+            background: #f5f5f5;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            color: #4b4b4b;
+        }
         @media print {
-            #receipt {
-                display: block;
+            body {
+                background: #ffffff;
+                color: #000000;
+            }
+            .receipt {
+                border: none;
+                box-shadow: none;
             }
             .no-print {
                 display: none;
             }
-        }
-        .mode-card {
-            transition: all 0.3s ease;
-        }
-        .mode-card:hover {
-            transform: scale(1.05);
-            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.2);
-        }
-        .error-message {
-            color: #dc2626;
-            font-weight: 500;
-        }
-        .success-message {
-            color: #10b981;
-            font-weight: 500;
-        }
-        .done-button {
-            background-color: #14b8a6;
-            color: white;
-            font-weight: bold;
-            padding: 8px 16px;
-            border-radius: 8px;
-            transition: background-color 0.3s ease;
-        }
-        .done-button:hover {
-            background-color: #0d9488;
         }
         @media (max-width: 640px) {
             .scanner-container {
@@ -108,59 +183,64 @@
         }
     </style>
 </head>
-<body class="bg-gray-100 min-h-screen">
-    <div id="landingPage" class="container mx-auto p-6 max-w-7xl">
-        <h1 class="text-4xl font-bold text-center text-gray-800 mb-8">Welcome to SuperScan</h1>
-        <p class="text-center text-gray-600 mb-12">Choose an option to get started</p>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div class="mode-card bg-white rounded-lg shadow-lg p-6 text-center cursor-pointer" onclick="showSection('inventory')">
-                <h2 class="text-2xl font-semibold text-gray-700 mb-2">Inventory Management</h2>
-                <p class="text-gray-600">Add, edit, or delete items in your inventory.</p>
+<body class="min-h-screen">
+    <div id="landingPage" class="container mx-auto p-6">
+        <h1 class="text-5xl font-bold text-center text-[#d4af37] mb-8">SuperScan</h1>
+        <p class="text-center text-gray-300 mb-12 text-lg">Premium Inventory & POS System</p>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <div class="card p-6 text-center cursor-pointer" onclick="showSection('inventory')">
+                <h2 class="text-xl font-semibold text-[#d4af37] mb-2">Inventory Management</h2>
+                <p class="text-gray-600">Manage your stock with ease.</p>
             </div>
-            <div class="mode-card bg-white rounded-lg shadow-lg p-6 text-center cursor-pointer" onclick="showSection('pos')">
-                <h2 class="text-2xl font-semibold text-gray-700 mb-2">Point of Sale</h2>
-                <p class="text-gray-600">Scan items and process sales.</p>
+            <div class="card p-6 text-center cursor-pointer" onclick="showSection('pos')">
+                <h2 class="text-xl font-semibold text-[#d4af37] mb-2">Point of Sale</h2>
+                <p class="text-gray-600">Process sales efficiently.</p>
             </div>
-            <div class="mode-card bg-white rounded-lg shadow-lg p-6 text-center cursor-pointer" onclick="showSection('scanner')">
-                <h2 class="text-2xl font-semibold text-gray-700 mb-2">Barcode Scanner</h2>
-                <p class="text-gray-600">Scan barcodes to add or view items.</p>
+            <div class="card p-6 text-center cursor-pointer" onclick="showSection('scanner')">
+                <h2 class="text-xl font-semibold text-[#d4af37] mb-2">Barcode Scanner</h2>
+                <p class="text-gray-600">Scan barcodes seamlessly.</p>
+            </div>
+            <div class="card p-6 text-center cursor-pointer" onclick="showSection('history')">
+                <h2 class="text-xl font-semibold text-[#d4af37] mb-2">Transaction History</h2>
+                <p class="text-gray-600">View all past transactions.</p>
             </div>
         </div>
     </div>
 
     <!-- Inventory Management Section -->
-    <div id="inventorySection" class="container mx-auto p-6 max-w-7xl hidden">
+    <div id="inventorySection" class="container mx-auto p-6 hidden">
         <div class="flex justify-between items-center mb-8">
-            <h1 class="text-4xl font-bold text-gray-800">Inventory Management</h1>
-            <button onclick="showSection('landing')" class="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600 transition">Back to Menu</button>
+            <h1 class="text-4xl font-bold text-[#d4af37]">Inventory Management</h1>
+            <button onclick="showSection('landing')" class="btn-secondary">Back to Menu</button>
         </div>
-        <div class="bg-white rounded-lg shadow-lg p-6 mb-8">
-            <h2 class="text-2xl font-semibold text-gray-700 mb-4">Manage Inventory</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="card p-6 mb-8">
+            <h2 class="text-2xl font-semibold text-[#d4af37] mb-4">Manage Inventory</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <!-- Add/Edit Item -->
                 <div>
-                    <h3 class="text-lg font-medium text-gray-600 mb-2">Add New Item</h3>
+                    <h3 class="text-lg font-medium text-gray-800 mb-2">Add New Item</h3>
                     <div class="scanner-container">
                         <video id="inventoryScannerVideo" class="scanner-video hidden" autoplay muted playsinline></video>
                         <div id="inventoryScannerOverlay" class="scanner-overlay hidden"></div>
                     </div>
                     <p id="inventoryScannerFeedback" class="mt-2 hidden"></p>
-                    <button id="inventoryTestCamera" class="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600 transition mb-2">Test Camera</button>
-                    <input id="barcodeInput" type="text" placeholder="Scan or Enter Barcode" class="scanner-input w-full p-2 rounded-md mb-2">
+                    <button id="inventoryTestCamera" class="btn-secondary mb-2">Test Camera</button>
+                    <input id="barcodeInput" type="text" placeholder="Scan or Enter Barcode" class="scanner-input w-full mb-2">
                     <div class="flex gap-2 mb-2">
-                        <button id="inventoryStartScanner" class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition">Scan Barcode</button>
-                        <button id="inventoryStopScanner" class="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 transition hidden">Stop Scanner</button>
+                        <button id="inventoryStartScanner" class="btn-primary">Scan Barcode</button>
+                        <button id="inventoryStopScanner" class="btn-danger hidden">Stop Scanner</button>
                         <button id="inventoryDoneScan" class="done-button hidden">Done</button>
-                        <button id="inventoryManualScan" class="bg-purple-500 text-white px-4 py-2 rounded-md hover:bg-purple-600 transition">Submit Manual Barcode</button>
+                        <button id="inventoryManualScan" class="btn-primary">Submit Manual Barcode</button>
                     </div>
-                    <input id="itemName" type="text" placeholder="Item Name" class="w-full p-2 border rounded-md mb-2">
-                    <input id="itemPrice" type="number" step="0.01" placeholder="Price (e.g., 9.99)" class="w-full p-2 border rounded-md mb-2">
-                    <button id="saveItem" class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition">Save Item</button>
-                    <button id="editItem" class="bg-yellow-500 text-white px-4 py-2 rounded-md hover:bg-yellow-600 transition hidden">Update Item</button>
+                    <input id="itemName" type="text" placeholder="Item Name" class="scanner-input w-full mb-2">
+                    <input id="itemPrice" type="number" step="0.01" placeholder="Price (e.g., 9.99)" class="scanner-input w-full mb-2">
+                    <input id="itemStock" type="number" placeholder="Stock Quantity" class="scanner-input w-full mb-2">
+                    <button id="saveItem" class="btn-primary">Save Item</button>
+                    <button id="editItem" class="btn-primary hidden">Update Item</button>
                 </div>
                 <!-- Item List -->
                 <div>
-                    <h3 class="text-lg font-medium text-gray-600 mb-2">Inventory</h3>
+                    <h3 class="text-lg font-medium text-gray-800 mb-2">Inventory</h3>
                     <div id="inventoryList" class="max-h-96 overflow-y-auto">
                         <!-- Items will be dynamically added here -->
                     </div>
@@ -170,42 +250,52 @@
     </div>
 
     <!-- POS Section -->
-    <div id="posSection" class="container mx-auto p-6 max-w-7xl hidden">
+    <div id="posSection" class="container mx-auto p-6 hidden">
         <div class="flex justify-between items-center mb-8">
-            <h1 class="text-4xl font-bold text-gray-800">Point of Sale</h1>
-            <button onclick="showSection('landing')" class="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600 transition">Back to Menu</button>
+            <h1 class="text-4xl font-bold text-[#d4af37]">Point of Sale</h1>
+            <button onclick="showSection('landing')" class="btn-secondary">Back to Menu</button>
         </div>
-        <div class="bg-white rounded-lg shadow-lg p-6">
-            <h2 class="text-2xl font-semibold text-gray-700 mb-4">Point of Sale</h2>
+        <div class="card p-6">
+            <h2 class="text-2xl font-semibold text-[#d4af37] mb-4">Point of Sale</h2>
             <div class="scanner-container">
                 <video id="posScannerVideo" class="scanner-video hidden" autoplay muted playsinline></video>
                 <div id="posScannerOverlay" class="scanner-overlay hidden"></div>
             </div>
             <p id="posScannerFeedback" class="mt-2 hidden"></p>
-            <button id="posTestCamera" class="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600 transition mb-2">Test Camera</button>
-            <input id="posBarcode" type="text" placeholder="Scan or Enter Barcode" class="scanner-input w-full p-2 rounded-md mb-2">
+            <button id="posTestCamera" class="btn-secondary mb-2">Test Camera</button>
+            <input id="posBarcode" type="text" placeholder="Scan or Enter Barcode" class="scanner-input w-full mb-2">
             <div class="flex gap-2 mb-4">
-                <button id="posStartScanner" class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition">Scan Barcode</button>
-                <button id="posStopScanner" class="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 transition hidden">Stop Scanner</button>
+                <button id="posStartScanner" class="btn-primary">Scan Barcode</button>
+                <button id="posStopScanner" class="btn-danger hidden">Stop Scanner</button>
                 <button id="posDoneScan" class="done-button hidden">Done</button>
-                <button id="posManualScan" class="bg-purple-500 text-white px-4 py-2 rounded-md hover:bg-purple-600 transition">Submit Manual Barcode</button>
+                <button id="posManualScan" class="btn-primary">Submit Manual Barcode</button>
+                <button id="orderFromSaved" class="btn-success">Order from Saved Items</button>
             </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <!-- Order from Saved Items Modal -->
+            <div id="orderModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden">
+                <div class="card p-6 w-full max-w-lg">
+                    <h3 class="text-xl font-semibold text-[#d4af37] mb-4">Order from Saved Items</h3>
+                    <div id="savedItemsList" class="max-h-60 overflow-y-auto mb-4"></div>
+                    <button id="confirmOrder" class="btn-primary w-full">Confirm Order</button>
+                    <button id="closeOrderModal" class="btn-secondary w-full mt-2">Close</button>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <!-- Cart -->
                 <div>
-                    <h3 class="text-lg font-medium text-gray-600 mb-2">Cart</h3>
+                    <h3 class="text-lg font-medium text-gray-800 mb-2">Cart</h3>
                     <div id="cartList" class="max-h-96 overflow-y-auto">
                         <!-- Cart items will be dynamically added here -->
                     </div>
                 </div>
                 <!-- Summary -->
                 <div>
-                    <h3 class="text-lg font-medium text-gray-600 mb-2">Summary</h3>
+                    <h3 class="text-lg font-medium text-gray-800 mb-2">Summary</h3>
                     <div class="bg-gray-50 p-4 rounded-md">
                         <p class="text-gray-600">Total Items: <span id="totalItems">0</span></p>
                         <p class="text-gray-600">Total Amount: $<span id="totalAmount">0.00</span></p>
-                        <button id="clearCart" class="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 transition mt-4">Clear Cart</button>
-                        <button id="printReceipt" class="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition mt-4 ml-2">Print Receipt</button>
+                        <button id="clearCart" class="btn-danger mt-4">Clear Cart</button>
+                        <button id="printReceipt" class="btn-success mt-4 ml-2">Checkout & Print Receipt</button>
                     </div>
                 </div>
             </div>
@@ -213,56 +303,78 @@
     </div>
 
     <!-- Scanner Section -->
-    <div id="scannerSection" class="container mx-auto p-6 max-w-7xl hidden">
+    <div id="scannerSection" class="container mx-auto p-6 hidden">
         <div class="flex justify-between items-center mb-8">
-            <h1 class="text-4xl font-bold text-gray-800">Barcode Scanner</h1>
-            <button onclick="showSection('landing')" class="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600 transition">Back to Menu</button>
+            <h1 class="text-4xl font-bold text-[#d4af37]">Barcode Scanner</h1>
+            <button onclick="showSection('landing')" class="btn-secondary">Back to Menu</button>
         </div>
-        <div class="bg-white rounded-lg shadow-lg p-6">
-            <h2 class="text-2xl font-semibold text-gray-700 mb-4">Scan a Barcode</h2>
+        <div class="card p-6">
+            <h2 class="text-2xl font-semibold text-[#d4af37] mb-4">Scan a Barcode</h2>
             <div class="scanner-container">
                 <video id="scannerVideo" class="scanner-video hidden" autoplay muted playsinline></video>
                 <div id="scannerOverlay" class="scanner-overlay hidden"></div>
             </div>
             <p id="scannerFeedback" class="mt-2 hidden"></p>
-            <button id="testCamera" class="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600 transition mb-2">Test Camera</button>
+            <button id="testCamera" class="btn-secondary mb-2">Test Camera</button>
             <div class="mt-4">
-                <input id="manualBarcode" type="text" placeholder="Enter barcode manually" class="scanner-input w-full p-2 rounded-md mb-2">
-                <button id="manualScan" class="bg-purple-500 text-white px-4 py-2 rounded-md hover:bg-purple-600 transition">Submit Manual Barcode</button>
+                <input id="manualBarcode" type="text" placeholder="Enter barcode manually" class="scanner-input w-full mb-2">
+                <button id="manualScan" class="btn-primary">Submit Manual Barcode</button>
             </div>
             <div class="flex gap-2 mt-4">
-                <button id="startScanner" class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition">Start Scanner</button>
-                <button id="stopScanner" class="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 transition hidden">Stop Scanner</button>
+                <button id="startScanner" class="btn-primary">Start Scanner</button>
+                <button id="stopScanner" class="btn-danger hidden">Stop Scanner</button>
                 <button id="doneScan" class="done-button hidden">Done</button>
             </div>
         </div>
     </div>
 
+    <!-- Transaction History Section -->
+    <div id="historySection" class="container mx-auto p-6 hidden">
+        <div class="flex justify-between items-center mb-8">
+            <h1 class="text-4xl font-bold text-[#d4af37]">Transaction History</h1>
+            <button onclick="showSection('landing')" class="btn-secondary">Back to Menu</button>
+        </div>
+        <div class="card p-6">
+            <h2 class="text-2xl font-semibold text-[#d4af37] mb-4">Past Transactions</h2>
+            <div id="transactionList" class="max-h-[600px] overflow-y-auto">
+                <!-- Transactions will be dynamically added here -->
+            </div>
+        </div>
+    </div>
+
     <!-- Receipt for Printing -->
-    <div id="receipt" class="bg-white p-6 mt-8">
-        <h2 class="text-2xl font-bold text-center">SuperScan Receipt</h2>
-        <p class="text-center text-gray-600">Date: <span id="receiptDate"></span></p>
-        <table class="w-full mt-4 border-collapse">
-            <thead>
-                <tr class="border-b">
-                    <th class="text-left py-2">Item</th>
-                    <th class="text-right py-2">Price</th>
-                </tr>
-            </thead>
-            <tbody id="receiptItems"></tbody>
-            <tfoot>
-                <tr class="border-t font-semibold">
-                    <td class="py-2">Total</td>
-                    <td class="text-right py-2">$<span id="receiptTotal"></span></td>
-                </tr>
-            </tfoot>
-        </table>
+    <div id="receipt" class="no-print">
+        <div class="receipt">
+            <div class="receipt-logo">Logo</div>
+            <h2 class="text-2xl font-bold text-center text-gray-800 mt-4">SuperScan Receipt</h2>
+            <p class="text-center text-gray-600 mt-2">Transaction ID: <span id="receiptTransactionId"></span></p>
+            <p class="text-center text-gray-600">Order Number: <span id="receiptOrderNumber"></span></p>
+            <p class="text-center text-gray-600">Date: <span id="receiptDate"></span></p>
+            <hr class="my-4 border-gray-300">
+            <table class="w-full mt-4 border-collapse">
+                <thead>
+                    <tr class="border-b border-gray-300">
+                        <th class="text-left py-2 text-gray-800">Item</th>
+                        <th class="text-right py-2 text-gray-800">Price</th>
+                    </tr>
+                </thead>
+                <tbody id="receiptItems"></tbody>
+                <tfoot>
+                    <tr class="border-t border-gray-300 font-semibold">
+                        <td class="py-2 text-gray-800">Total</td>
+                        <td class="text-right py-2 text-gray-800">$<span id="receiptTotal"></span></td>
+                    </tr>
+                </tfoot>
+            </table>
+            <p class="text-center text-gray-600 mt-4">Thank you for your purchase!</p>
+        </div>
     </div>
 
     <script>
-        // Inventory storage
+        // Data storage
         let inventory = JSON.parse(localStorage.getItem('inventory')) || {};
         let cart = [];
+        let transactions = JSON.parse(localStorage.getItem('transactions')) || [];
         let scannerActive = false;
         let currentScannerSection = null;
         let lastScannedBarcode = null;
@@ -274,9 +386,11 @@
             inventorySection: document.getElementById('inventorySection'),
             posSection: document.getElementById('posSection'),
             scannerSection: document.getElementById('scannerSection'),
+            historySection: document.getElementById('historySection'),
             barcodeInput: document.getElementById('barcodeInput'),
             itemName: document.getElementById('itemName'),
             itemPrice: document.getElementById('itemPrice'),
+            itemStock: document.getElementById('itemStock'),
             saveItem: document.getElementById('saveItem'),
             editItem: document.getElementById('editItem'),
             inventoryList: document.getElementById('inventoryList'),
@@ -286,6 +400,13 @@
             totalAmount: document.getElementById('totalAmount'),
             clearCart: document.getElementById('clearCart'),
             printReceipt: document.getElementById('printReceipt'),
+            orderFromSaved: document.getElementById('orderFromSaved'),
+            orderModal: document.getElementById('orderModal'),
+            savedItemsList: document.getElementById('savedItemsList'),
+            confirmOrder: document.getElementById('confirmOrder'),
+            closeOrderModal: document.getElementById('closeOrderModal'),
+            receiptTransactionId: document.getElementById('receiptTransactionId'),
+            receiptOrderNumber: document.getElementById('receiptOrderNumber'),
             receiptDate: document.getElementById('receiptDate'),
             receiptItems: document.getElementById('receiptItems'),
             receiptTotal: document.getElementById('receiptTotal'),
@@ -313,7 +434,8 @@
             posScannerVideo: document.getElementById('posScannerVideo'),
             posScannerOverlay: document.getElementById('posScannerOverlay'),
             posScannerFeedback: document.getElementById('posScannerFeedback'),
-            posManualScan: document.getElementById('posManualScan')
+            posManualScan: document.getElementById('posManualScan'),
+            transactionList: document.getElementById('transactionList')
         };
 
         // Check DOM elements
@@ -325,6 +447,7 @@
         try {
             renderInventory();
             renderCart();
+            renderTransactionHistory();
             console.log('Page initialized successfully');
         } catch (err) {
             console.error('Initialization error:', err);
@@ -338,6 +461,7 @@
                 elements.inventorySection.classList.add('hidden');
                 elements.posSection.classList.add('hidden');
                 elements.scannerSection.classList.add('hidden');
+                elements.historySection.classList.add('hidden');
 
                 if (section === 'landing') {
                     elements.landingPage.classList.remove('hidden');
@@ -350,11 +474,24 @@
                     stopScannerFunc();
                 } else if (section === 'scanner') {
                     elements.scannerSection.classList.remove('hidden');
+                } else if (section === 'history') {
+                    elements.historySection.classList.remove('hidden');
+                    stopScannerFunc();
                 }
                 console.log(`Switched to section: ${section}`);
             } catch (err) {
                 console.error('Error in showSection:', err);
             }
+        }
+
+        // Generate Unique ID
+        function generateUniqueId() {
+            return 'TX' + Date.now() + Math.random().toString(36).substr(2, 9);
+        }
+
+        // Generate Order Number
+        function generateOrderNumber() {
+            return 'ORD' + Math.floor(Math.random() * 1000000).toString().padStart(6, '0');
         }
 
         // Save or Update Item
@@ -363,9 +500,10 @@
                 const barcode = elements.barcodeInput.value.trim();
                 const name = elements.itemName.value.trim();
                 const price = parseFloat(elements.itemPrice.value);
+                const stock = parseInt(elements.itemStock.value);
 
-                if (barcode && name && price > 0) {
-                    inventory[barcode] = { name, price };
+                if (barcode && name && price > 0 && stock >= 0) {
+                    inventory[barcode] = { name, price, stock };
                     localStorage.setItem('inventory', JSON.stringify(inventory));
                     renderInventory();
                     clearInputs();
@@ -386,6 +524,7 @@
                 elements.barcodeInput.value = barcode;
                 elements.itemName.value = item.name;
                 elements.itemPrice.value = item.price;
+                elements.itemStock.value = item.stock;
                 elements.barcodeInput.disabled = true;
                 elements.saveItem.classList.add('hidden');
                 elements.editItem.classList.remove('hidden');
@@ -394,8 +533,9 @@
                     try {
                         const name = elements.itemName.value.trim();
                         const price = parseFloat(elements.itemPrice.value);
-                        if (name && price > 0) {
-                            inventory[barcode] = { name, price };
+                        const stock = parseInt(elements.itemStock.value);
+                        if (name && price > 0 && stock >= 0) {
+                            inventory[barcode] = { name, price, stock };
                             localStorage.setItem('inventory', JSON.stringify(inventory));
                             renderInventory();
                             clearInputs();
@@ -439,15 +579,16 @@
                 for (const barcode in inventory) {
                     const item = inventory[barcode];
                     const itemCard = document.createElement('div');
-                    itemCard.className = 'item-card bg-gray-50 p-4 rounded-md mb-2 flex justify-between items-center';
+                    itemCard.className = 'bg-gray-50 p-4 rounded-md mb-2 flex justify-between items-center';
                     itemCard.innerHTML = `
                         <div>
-                            <p class="font-medium">${item.name}</p>
+                            <p class="font-medium text-gray-800">${item.name}</p>
                             <p class="text-sm text-gray-600">Barcode: ${barcode}</p>
                             <p class="text-sm text-gray-600">Price: $${item.price.toFixed(2)}</p>
+                            <p class="text-sm text-gray-600">Stock: ${item.stock}</p>
                         </div>
                         <div>
-                            <button onclick="prepareEdit('${barcode}')" class="text-yellow-500 hover:text-yellow-600 mr-2">Edit</button>
+                            <button onclick="prepareEdit('${barcode}')" class="text-[#d4af37] hover:text-[#b8972e] mr-2">Edit</button>
                             <button onclick="deleteItem('${barcode}')" class="text-red-500 hover:text-red-600">Delete</button>
                         </div>
                     `;
@@ -465,6 +606,7 @@
                 elements.barcodeInput.value = '';
                 elements.itemName.value = '';
                 elements.itemPrice.value = '';
+                elements.itemStock.value = '';
             } catch (err) {
                 console.error('Error clearing inputs:', err);
             }
@@ -473,15 +615,20 @@
         // POS: Add to Cart
         function addToCart(barcode) {
             try {
-                if (inventory[barcode]) {
-                    cart.push({ barcode, ...inventory[barcode] });
-                    renderCart();
-                    showFeedback(elements.posScannerFeedback, `Added ${inventory[barcode].name} to cart!`, true);
-                    elements.posScannerVideo.classList.add('scanner-success');
-                    setTimeout(() => elements.posScannerVideo.classList.remove('scanner-success'), 500);
-                } else {
+                if (!inventory[barcode]) {
                     showFeedback(elements.posScannerFeedback, 'Item not found in inventory.', false);
+                    return;
                 }
+                const item = inventory[barcode];
+                if (item.stock <= 0) {
+                    showFeedback(elements.posScannerFeedback, `Out of stock: ${item.name}.`, false);
+                    return;
+                }
+                cart.push({ barcode, ...item });
+                renderCart();
+                showFeedback(elements.posScannerFeedback, `Added ${item.name} to cart!`, true);
+                elements.posScannerVideo.classList.add('scanner-success');
+                setTimeout(() => elements.posScannerVideo.classList.remove('scanner-success'), 500);
                 elements.posBarcode.value = '';
             } catch (err) {
                 console.error('Error adding to cart:', err);
@@ -499,6 +646,60 @@
             }
         });
 
+        // Order from Saved Items
+        elements.orderFromSaved.addEventListener('click', () => {
+            try {
+                elements.savedItemsList.innerHTML = '';
+                for (const barcode in inventory) {
+                    const item = inventory[barcode];
+                    const itemRow = document.createElement('div');
+                    itemRow.className = 'flex justify-between items-center bg-gray-50 p-3 rounded-md mb-2';
+                    itemRow.innerHTML = `
+                        <div>
+                            <p class="font-medium text-gray-800">${item.name}</p>
+                            <p class="text-sm text-gray-600">Price: $${item.price.toFixed(2)}</p>
+                            <p class="text-sm text-gray-600">Stock: ${item.stock}</p>
+                        </div>
+                        <div class="flex items-center">
+                            <input type="number" min="1" max="${item.stock}" value="1" class="quantity-input w-16 p-1 border rounded-md mr-2" data-barcode="${barcode}">
+                            <button class="add-to-cart-btn text-[#d4af37] hover:text-[#b8972e]" data-barcode="${barcode}">Add</button>
+                        </div>
+                    `;
+                    elements.savedItemsList.appendChild(itemRow);
+                }
+
+                // Add event listeners to Add buttons
+                document.querySelectorAll('.add-to-cart-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const barcode = btn.dataset.barcode;
+                        const quantityInput = btn.parentElement.querySelector('.quantity-input');
+                        const quantity = parseInt(quantityInput.value);
+                        if (quantity > 0 && quantity <= inventory[barcode].stock) {
+                            for (let i = 0; i < quantity; i++) {
+                                addToCart(barcode);
+                            }
+                        } else {
+                            showFeedback(elements.posScannerFeedback, 'Invalid quantity or insufficient stock.', false);
+                        }
+                    });
+                });
+
+                elements.orderModal.classList.remove('hidden');
+            } catch (err) {
+                console.error('Error opening order modal:', err);
+                showFeedback(elements.posScannerFeedback, 'Error loading saved items.', false);
+            }
+        });
+
+        elements.closeOrderModal.addEventListener('click', () => {
+            elements.orderModal.classList.add('hidden');
+        });
+
+        elements.confirmOrder.addEventListener('click', () => {
+            elements.orderModal.classList.add('hidden');
+            showFeedback(elements.posScannerFeedback, 'Items added to cart!', true);
+        });
+
         // Render Cart
         function renderCart() {
             try {
@@ -510,7 +711,7 @@
                     cartItem.className = 'bg-gray-50 p-4 rounded-md mb-2 flex justify-between items-center';
                     cartItem.innerHTML = `
                         <div>
-                            <p class="font-medium">${item.name}</p>
+                            <p class="font-medium text-gray-800">${item.name}</p>
                             <p class="text-sm text-gray-600">Price: $${item.price.toFixed(2)}</p>
                         </div>
                         <button onclick="removeFromCart(${index})" class="text-red-500 hover:text-red-600">Remove</button>
@@ -549,30 +750,90 @@
             }
         });
 
-        // Print Receipt
+        // Checkout & Print Receipt
         elements.printReceipt.addEventListener('click', () => {
             try {
                 if (cart.length === 0) {
                     showFeedback(elements.posScannerFeedback, 'Cart is empty.', false);
                     return;
                 }
+
+                // Update stock
+                cart.forEach(item => {
+                    if (inventory[item.barcode]) {
+                        inventory[item.barcode].stock -= 1;
+                    }
+                });
+                localStorage.setItem('inventory', JSON.stringify(inventory));
+                renderInventory();
+
+                // Generate transaction
+                const transactionId = generateUniqueId();
+                const orderNumber = generateOrderNumber();
+                const transaction = {
+                    id: transactionId,
+                    orderNumber: orderNumber,
+                    date: new Date().toLocaleString(),
+                    items: [...cart],
+                    total: cart.reduce((sum, item) => sum + item.price, 0)
+                };
+                transactions.push(transaction);
+                localStorage.setItem('transactions', JSON.stringify(transactions));
+                renderTransactionHistory();
+
+                // Prepare receipt
+                elements.receiptTransactionId.textContent = transactionId;
+                elements.receiptOrderNumber.textContent = orderNumber;
                 elements.receiptDate.textContent = new Date().toLocaleString();
                 elements.receiptItems.innerHTML = '';
                 cart.forEach(item => {
                     const row = document.createElement('tr');
                     row.innerHTML = `
-                        <td class="py-2">${item.name}</td>
-                        <td class="text-right py-2">$${item.price.toFixed(2)}</td>
+                        <td class="py-2 text-gray-800">${item.name}</td>
+                        <td class="text-right py-2 text-gray-800">$${item.price.toFixed(2)}</td>
                     `;
                     elements.receiptItems.appendChild(row);
                 });
-                elements.receiptTotal.textContent = cart.reduce((sum, item) => sum + item.price, 0).toFixed(2);
+                elements.receiptTotal.textContent = transaction.total.toFixed(2);
+
+                // Print receipt
                 window.print();
+
+                // Clear cart after printing
+                cart = [];
+                renderCart();
             } catch (err) {
-                console.error('Error printing receipt:', err);
-                showFeedback(elements.posScannerFeedback, 'Error printing receipt.', false);
+                console.error('Error during checkout:', err);
+                showFeedback(elements.posScannerFeedback, 'Error during checkout. Please try again.', false);
             }
         });
+
+        // Render Transaction History
+        function renderTransactionHistory() {
+            try {
+                elements.transactionList.innerHTML = '';
+                transactions.forEach(transaction => {
+                    const transactionCard = document.createElement('div');
+                    transactionCard.className = 'bg-gray-50 p-4 rounded-md mb-4';
+                    let itemsHtml = '';
+                    transaction.items.forEach(item => {
+                        itemsHtml += `<p class="text-sm text-gray-600">${item.name} - $${item.price.toFixed(2)}</p>`;
+                    });
+                    transactionCard.innerHTML = `
+                        <div class="flex justify-between items-center mb-2">
+                            <h3 class="text-lg font-medium text-gray-800">Transaction ID: ${transaction.id}</h3>
+                            <p class="text-sm text-gray-600">Order #: ${transaction.orderNumber}</p>
+                        </div>
+                        <p class="text-sm text-gray-600">Date: ${transaction.date}</p>
+                        ${itemsHtml}
+                        <p class="text-sm font-semibold text-gray-800 mt-2">Total: $${transaction.total.toFixed(2)}</p>
+                    `;
+                    elements.transactionList.appendChild(transactionCard);
+                });
+            } catch (err) {
+                console.error('Error rendering transaction history:', err);
+            }
+        }
 
         // Show Feedback
         function showFeedback(element, message, isSuccess) {
@@ -586,7 +847,7 @@
             }
         }
 
-        // Check Camera Permission and Access
+        // Check Camera Access
         async function checkCameraAccess(feedbackElement, videoElement, overlayElement) {
             try {
                 if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
@@ -633,7 +894,7 @@
             }
         }
 
-        // Test Camera (Manual Stream Test)
+        // Test Camera
         function testCamera(section, videoElement, overlayElement, feedbackElement) {
             try {
                 checkCameraAccess(feedbackElement, videoElement, overlayElement).then(success => {
