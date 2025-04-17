@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SuperScan Receipt</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #ffffff;
+            color: #1a1a1a;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .receipt-container {
+            width: 400px;
+            background: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+            padding: 2rem;
+            border: 1px solid #e0e0e0;
+        }
+        .receipt-header {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+        .receipt-logo {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin: 0 auto;
+            display: block;
+            border: 2px solid #2a2a72;
+        }
+        .no-logo {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: #f5f5f5;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            color: #666;
+            border: 2px solid #e0e0e0;
+        }
+        .company-name {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: #2a2a72;
+            margin: 1rem 0 0.5rem;
+        }
+        .transaction-details {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 0.5rem;
+        }
+        .transaction-details p {
+            margin: 0.25rem 0;
+        }
+        .divider {
+            border-top: 2px dashed #e0e0e0;
+            margin: 1.5rem 0;
+        }
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 1.5rem;
+        }
+        .items-table th,
+        .items-table td {
+            padding: 0.75rem 0;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        .items-table th {
+            font-weight: 600;
+            color: #2a2a72;
+            font-size: 0.95rem;
+        }
+        .items-table td {
+            font-size: 0.9rem;
+            color: #333;
+        }
+        .items-table .text-center {
+            text-align: center;
+        }
+        .items-table .text-right {
+            text-align: right;
+        }
+        .total-row {
+            font-weight: 600;
+            border-top: 2px solid #2a2a72;
+            border-bottom: none;
+        }
+        .barcode {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 1rem;
+            text-align: center;
+            margin: 1rem 0;
+            letter-spacing: 2px;
+            color: #1a1a1a;
+            background: #f5f5f5;
+            padding: 0.5rem;
+            border-radius: 8px;
+        }
+        .receipt-footer {
+            text-align: center;
+            font-size: 0.85rem;
+            color: #666;
+            margin-top: 1.5rem;
+        }
+        .receipt-footer p {
+            margin: 0.25rem 0;
+        }
+        .thank-you {
+            font-weight: 500;
+            color: #2a2a72;
+        }
+        .print-button, .back-button {
+            display: block;
+            width: 100%;
+            font-weight: 600;
+            padding: 0.75rem;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            margin-top: 1rem;
+            transition: background 0.3s ease, transform 0.1s ease;
+        }
+        .print-button {
+            background: #2a2a72;
+            color: #ffffff;
+        }
+        .print-button:hover {
+            background: #1a1a5c;
+            transform: scale(1.02);
+        }
+        .back-button {
+            background: #666;
+            color: #ffffff;
+        }
+        .back-button:hover {
+            background: #555;
+            transform: scale(1.02);
+        }
+        @media print {
+            body {
+                background: #ffffff;
+            }
+            .receipt-container {
+                box-shadow: none;
+                border: none;
+                width: 100%;
+            }
+            .print-button, .back-button {
+                display: none;
+            }
+            .divider {
+                border-top: 2px dashed #666;
+            }
+        }
+        @media (max-width: 500px) {
+            .receipt-container {
+                width: 100%;
+                padding: 1rem;
+                border-radius: 0;
+                box-shadow: none;
+                border: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="receiptContainer" class="receipt-container">
+        <div class="receipt-header">
+            <img id="receiptLogo" class="receipt-logo" style="display: none;" alt="Company Logo">
+            <div id="noLogo" class="no-logo">No Logo</div>
+            <h1 id="companyName" class="company-name">SuperScan</h1>
+            <div class="transaction-details">
+                <p id="transactionId">Transaction ID: N/A</p>
+                <p id="orderNumber">Order #: N/A</p>
+                <p id="date">Date: N/A</p>
+                <p id="cashier">Cashier: N/A</p>
+            </div>
+        </div>
+        <div class="divider"></div>
+        <table class="items-table">
+            <thead>
+                <tr>
+                    <th>Item</th>
+                    <th class="text-right">Price</th>
+                    <th class="text-center">Qty</th>
+                    <th class="text-right">Total</th>
+                </tr>
+            </thead>
+            <tbody id="itemsTableBody"></tbody>
+            <tfoot>
+                <tr class="total-row">
+                    <td>Total</td>
+                    <td></td>
+                    <td class="text-center" id="totalItems">0</td>
+                    <td class="text-right">$<span id="totalAmount">0.00</span></td>
+                </tr>
+            </tfoot>
+        </table>
+        <div class="divider"></div>
+        <div class="barcode" id="barcode">N/A</div>
+        <div class="receipt-footer">
+            <p id="contactInfo">Contact: N/A</p>
+            <p class="thank-you">Thank you for your purchase!</p>
+            <p>Powered by SuperScan</p>
+        </div>
+        <button class="print-button" onclick="window.print()">Print Receipt</button>
+        <button class="back-button" onclick="goBack()">Back to SuperScan</button>
+    </div>
+
+    <script>
+        // Retrieve settings from localStorage
+        const companyName = localStorage.getItem('companyName') || 'SuperScan';
+        const contactInfo = localStorage.getItem('contactInfo') || '';
+        const cashierName = localStorage.getItem('cashierName') || 'Cashier';
+        const logoDataUrl = localStorage.getItem('logoDataUrl') || '';
+
+        // DOM Elements
+        const receiptContainer = document.getElementById('receiptContainer');
+        const receiptLogo = document.getElementById('receiptLogo');
+        const noLogo = document.getElementById('noLogo');
+        const companyNameElement = document.getElementById('companyName');
+        const transactionIdElement = document.getElementById('transactionId');
+        const orderNumberElement = document.getElementById('orderNumber');
+        const dateElement = document.getElementById('date');
+        const cashierElement = document.getElementById('cashier');
+        const itemsTableBody = document.getElementById('itemsTableBody');
+        const totalItemsElement = document.getElementById('totalItems');
+        const totalAmountElement = document.getElementById('totalAmount');
+        const barcodeElement = document.getElementById('barcode');
+        const contactInfoElement = document.getElementById('contactInfo');
+
+        // Check DOM elements
+        for (const [key, element] of Object.entries({
+            receiptContainer, receiptLogo, noLogo, companyNameElement, transactionIdElement,
+            orderNumberElement, dateElement, cashierElement, itemsTableBody, totalItemsElement,
+            totalAmountElement, barcodeElement, contactInfoElement
+        })) {
+            if (!element) {
+                console.error(`Element ${key} not found in DOM`);
+                document.body.innerHTML = '<div class="text-center p-6 text-red-600">Failed to initialize receipt. Please check the console for errors.</div>';
+                throw new Error(`Element ${key} missing`);
+            }
+        }
+
+        // Retrieve transaction data from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const transactionData = urlParams.get('transaction');
+        let transaction;
+
+        try {
+            if (!transactionData) {
+                throw new Error('No transaction data provided in URL');
+            }
+            transaction = JSON.parse(decodeURIComponent(transactionData));
+            console.log('Parsed transaction data:', transaction);
+        } catch (err) {
+            console.error('Error parsing transaction data:', err);
+            receiptContainer.innerHTML = '<p class="text-center text-red-600">Error loading receipt: Invalid or missing transaction data. Please ensure the transaction was generated correctly and try again. If running locally, use a local server (e.g., python -m http.server 8000).</p>';
+            return;
+        }
+
+        // Validate transaction data
+        if (!transaction || !transaction.id || !transaction.orderNumber || !transaction.date || !transaction.items || typeof transaction.total !== 'number') {
+            console.error('Invalid transaction data structure:', transaction);
+            receiptContainer.innerHTML = '<p class="text-center text-red-600">Error loading receipt: Transaction data is incomplete or corrupted.</p>';
+            return;
+        }
+
+        // Render receipt
+        try {
+            // Logo
+            if (logoDataUrl) {
+                receiptLogo.src = logoDataUrl;
+                receiptLogo.style.display = 'block';
+                noLogo.style.display = 'none';
+            } else {
+                receiptLogo.style.display = 'none';
+                noLogo.style.display = 'flex';
+            }
+
+            // Header
+            companyNameElement.textContent = companyName || 'SuperScan';
+            transactionIdElement.textContent = `Transaction ID: ${transaction.id || 'N/A'}`;
+            orderNumberElement.textContent = `Order #: ${transaction.orderNumber || 'N/A'}`;
+            dateElement.textContent = `Date: ${transaction.date || 'N/A'}`;
+            cashierElement.textContent = `Cashier: ${transaction.cashier || cashierName || 'N/A'}`;
+
+            // Items
+            if (!Array.isArray(transaction.items)) {
+                throw new Error('Transaction items must be an array');
+            }
+
+            transaction.items.forEach(item => {
+                if (!item.name || typeof item.quantity !== 'number' || typeof item.price !== 'number') {
+                    console.warn('Invalid item in transaction:', item);
+                    return;
+                }
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${item.name}</td>
+                    <td class="text-right">$${item.price.toFixed(2)}</td>
+                    <td class="text-center">${item.quantity}</td>
+                    <td class="text-right">$${(item.price * item.quantity).toFixed(2)}</td>
+                `;
+                itemsTableBody.appendChild(row);
+            });
+
+            // Totals
+            const totalItems = transaction.items.reduce((sum, item) => sum + (item.quantity || 0), 0);
+            totalItemsElement.textContent = totalItems;
+            totalAmountElement.textContent = (transaction.total || 0).toFixed(2);
+
+            // Barcode (simplified representation using transaction ID)
+            barcodeElement.textContent = transaction.id || 'N/A';
+
+            // Footer
+            if (contactInfo) {
+                contactInfoElement.textContent = `Contact: ${contactInfo}`;
+            } else {
+                contactInfoElement.style.display = 'none';
+            }
+
+            console.log('Receipt rendered successfully');
+        } catch (err) {
+            console.error('Error rendering receipt:', err);
+            receiptContainer.innerHTML = '<p class="text-center text-red-600">Error rendering receipt. Please check the console for details.</p>';
+        }
+
+        // Back button functionality
+        function goBack() {
+            try {
+                window.close();
+                setTimeout(() => {
+                    window.location.href = 'index.html';
+                }, 500);
+            } catch (err) {
+                console.error('Error navigating back:', err);
+                window.location.href = 'index.html';
+            }
+        }
+    </script>
+</body>
+</html>

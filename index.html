@@ -1106,6 +1106,14 @@
                     return;
                 }
 
+                // Validate cart items
+                const invalidItems = cart.filter(item => !item.barcode || !item.name || !item.price || !item.quantity);
+                if (invalidItems.length > 0) {
+                    console.error('Invalid items in cart:', invalidItems);
+                    showFeedback(elements.posScannerFeedback, 'Some cart items are invalid. Please remove them and try again.', false);
+                    return;
+                }
+
                 // Update stock
                 cart.forEach(item => {
                     if (inventory[item.barcode]) {
@@ -1119,20 +1127,31 @@
                 const transactionId = generateUniqueId();
                 const orderNumber = generateOrderNumber();
                 const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+                const totalAmount = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
                 const transaction = {
                     id: transactionId,
                     orderNumber: orderNumber,
                     date: new Date().toLocaleString(),
                     items: [...cart],
-                    total: cart.reduce((sum, item) => sum + (item.price * item.quantity), 0)
+                    total: totalAmount,
+                    totalItems: totalItems,
+                    cashier: cashierName
                 };
                 transactions.push(transaction);
                 localStorage.setItem('transactions', JSON.stringify(transactions));
                 renderTransactionHistory();
 
+                // Debug: Log the transaction data
+                console.log('Cart contents before transaction:', cart);
+                console.log('Transaction data being sent to receipt:', transaction);
+
                 // Open receipt in a new tab
                 const transactionData = encodeURIComponent(JSON.stringify(transaction));
-                window.open(`receipt.html?transaction=${transactionData}`, '_blank');
+                console.log('Opening receipt URL:', `receipt.html?transaction=${transactionData}`);
+                const newWindow = window.open(`receipt.html?transaction=${transactionData}`, '_blank');
+                if (!newWindow) {
+                    showFeedback(elements.posScannerFeedback, 'Popup blocked. Please allow popups for this site and try again.', false);
+                }
 
                 // Clear cart
                 cart = [];
@@ -1172,7 +1191,11 @@
             try {
                 const transaction = transactions[index];
                 const transactionData = encodeURIComponent(JSON.stringify(transaction));
-                window.open(`receipt.html?transaction=${transactionData}`, '_blank');
+                console.log('Opening historical receipt URL:', `receipt.html?transaction=${transactionData}`);
+                const newWindow = window.open(`receipt.html?transaction=${transactionData}`, '_blank');
+                if (!newWindow) {
+                    alert('Popup blocked. Please allow popups for this site and try again.');
+                }
             } catch (err) {
                 console.error('Error printing transaction receipt:', err);
                 alert('Error printing receipt.');
@@ -1584,4 +1607,4 @@
         });
     </script>
 </body>
-</html>
+</html>s
