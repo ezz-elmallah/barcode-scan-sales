@@ -223,6 +223,12 @@
             opacity: 1;
             transform: translateY(0);
         }
+        .login-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
         @media print {
             body {
                 background: #ffffff;
@@ -256,7 +262,20 @@
     </style>
 </head>
 <body class="min-h-screen">
-    <header class="header">
+    <!-- Login Page -->
+    <div id="loginPage" class="login-container">
+        <div class="card p-6 w-full max-w-sm">
+            <h2 class="text-2xl font-semibold text-[#d4af37] mb-4 text-center">Login to SuperScan</h2>
+            <p class="text-gray-400 light-mode:text-gray-600 mb-4 text-center">Use the credentials below or update them in Settings.</p>
+            <p class="text-gray-400 light-mode:text-gray-600 mb-4 text-center">Default Username: <span id="defaultUsername">admin</span> | Default Password: <span id="defaultPassword">password123</span></p>
+            <input id="usernameInput" type="text" placeholder="Username" class="scanner-input w-full mb-2">
+            <input id="passwordInput" type="password" placeholder="Password" class="scanner-input w-full mb-4">
+            <button id="loginButton" class="btn-primary w-full">Login</button>
+            <p id="loginError" class="error-message mt-2 text-center hidden"></p>
+        </div>
+    </div>
+
+    <header id="appHeader" class="header hidden">
         <div class="logo">SuperScan</div>
         <nav>
             <a href="#" onclick="showSection('landing'); return false;">Home</a>
@@ -266,195 +285,204 @@
             <a href="#" onclick="showSection('history'); return false;">History</a>
             <a href="#" onclick="showSection('settings'); return false;">Settings</a>
             <a href="#" onclick="toggleTheme(); return false;">Toggle Theme</a>
+            <a href="#" onclick="logout(); return false;">Logout</a>
         </nav>
     </header>
 
-    <div style="height: 80px;"></div>
+    <div id="appContent" class="hidden">
+        <div style="height: 80px;"></div>
 
-    <div id="landingPage" class="container section">
-        <h1 class="text-5xl font-bold text-center text-[#d4af37] mb-8">SuperScan</h1>
-        <p class="text-center text-gray-300 mb-12 text-lg">Premium Inventory & POS System</p>
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-            <div class="card p-6 text-center cursor-pointer" onclick="showSection('inventory')">
-                <h2 class="text-xl font-semibold text-[#d4af37] mb-2">Inventory Management</h2>
-                <p class="text-gray-400 light-mode:text-gray-600">Manage your stock with ease.</p>
-            </div>
-            <div class="card p-6 text-center cursor-pointer" onclick="showSection('pos')">
-                <h2 class="text-xl font-semibold text-[#d4af37] mb-2">Point of Sale</h2>
-                <p class="text-gray-400 light-mode:text-gray-600">Process sales efficiently.</p>
-            </div>
-            <div class="card p-6 text-center cursor-pointer" onclick="showSection('scanner')">
-                <h2 class="text-xl font-semibold text-[#d4af37] mb-2">Barcode Scanner</h2>
-                <p class="text-gray-400 light-mode:text-gray-600">Scan barcodes seamlessly.</p>
-            </div>
-            <div class="card p-6 text-center cursor-pointer" onclick="showSection('history')">
-                <h2 class="text-xl font-semibold text-[#d4af37] mb-2">Transaction History</h2>
-                <p class="text-gray-400 light-mode:text-gray-600">View all past transactions.</p>
-            </div>
-            <div class="card p-6 text-center cursor-pointer" onclick="showSection('settings')">
-                <h2 class="text-xl font-semibold text-[#d4af37] mb-2">Settings</h2>
-                <p class="text-gray-400 light-mode:text-gray-600">Customize your app settings.</p>
+        <div id="landingPage" class="container section">
+            <h1 class="text-5xl font-bold text-center text-[#d4af37] mb-8">SuperScan</h1>
+            <p class="text-center text-gray-300 mb-12 text-lg">Premium Inventory & POS System</p>
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <div class="card p-6 text-center cursor-pointer" onclick="showSection('inventory')">
+                    <h2 class="text-xl font-semibold text-[#d4af37] mb-2">Inventory Management</h2>
+                    <p class="text-gray-400 light-mode:text-gray-600">Manage your stock with ease.</p>
+                </div>
+                <div class="card p-6 text-center cursor-pointer" onclick="showSection('pos')">
+                    <h2 class="text-xl font-semibold text-[#d4af37] mb-2">Point of Sale</h2>
+                    <p class="text-gray-400 light-mode:text-gray-600">Process sales efficiently.</p>
+                </div>
+                <div class="card p-6 text-center cursor-pointer" onclick="showSection('scanner')">
+                    <h2 class="text-xl font-semibold text-[#d4af37] mb-2">Barcode Scanner</h2>
+                    <p class="text-gray-400 light-mode:text-gray-600">Scan barcodes seamlessly.</p>
+                </div>
+                <div class="card p-6 text-center cursor-pointer" onclick="showSection('history')">
+                    <h2 class="text-xl font-semibold text-[#d4af37] mb-2">Transaction History</h2>
+                    <p class="text-gray-400 light-mode:text-gray-600">View all past transactions.</p>
+                </div>
+                <div class="card p-6 text-center cursor-pointer" onclick="showSection('settings')">
+                    <h2 class="text-xl font-semibold text-[#d4af37] mb-2">Settings</h2>
+                    <p class="text-gray-400 light-mode:text-gray-600">Customize your app settings.</p>
+                </div>
             </div>
         </div>
-    </div>
 
-    <!-- Inventory Management Section -->
-    <div id="inventorySection" class="container section hidden">
-        <div class="flex justify-between items-center mb-8">
-            <h1 class="text-4xl font-bold text-[#d4af37]">Inventory Management</h1>
-            <button onclick="showSection('landing')" class="btn-secondary">Back to Menu</button>
-        </div>
-        <div class="card">
-            <h2 class="text-2xl font-semibold text-[#d4af37] mb-4">Manage Inventory</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- Add/Edit Item -->
-                <div>
-                    <h3 class="text-lg font-medium text-gray-200 light-mode:text-gray-800 mb-2">Add New Item</h3>
-                    <div class="scanner-container">
-                        <video id="inventoryScannerVideo" class="scanner-video hidden" autoplay muted playsinline></video>
-                        <div id="inventoryScannerOverlay" class="scanner-overlay hidden"></div>
+        <!-- Inventory Management Section -->
+        <div id="inventorySection" class="container section hidden">
+            <div class="flex justify-between items-center mb-8">
+                <h1 class="text-4xl font-bold text-[#d4af37]">Inventory Management</h1>
+                <button onclick="showSection('landing')" class="btn-secondary">Back to Menu</button>
+            </div>
+            <div class="card">
+                <h2 class="text-2xl font-semibold text-[#d4af37] mb-4">Manage Inventory</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Add/Edit Item -->
+                    <div>
+                        <h3 class="text-lg font-medium text-gray-200 light-mode:text-gray-800 mb-2">Add New Item</h3>
+                        <div class="scanner-container">
+                            <video id="inventoryScannerVideo" class="scanner-video hidden" autoplay muted playsinline></video>
+                            <div id="inventoryScannerOverlay" class="scanner-overlay hidden"></div>
+                        </div>
+                        <p id="inventoryScannerFeedback" class="mt-2 hidden"></p>
+                        <button id="inventoryTestCamera" class="btn-secondary mb-2">Test Camera</button>
+                        <input id="barcodeInput" type="text" placeholder="Scan or Enter Barcode" class="scanner-input w-full mb-2">
+                        <div class="flex gap-2 mb-2">
+                            <button id="inventoryStartScanner" class="btn-primary">Scan Barcode</button>
+                            <button id="inventoryStopScanner" class="btn-danger hidden">Stop Scanner</button>
+                            <button id="inventoryManualScan" class="btn-primary">Submit Manual Barcode</button>
+                        </div>
+                        <input id="itemName" type="text" placeholder="Item Name" class="scanner-input w-full mb-2">
+                        <input id="itemPrice" type="number" step="0.01" placeholder="Price (e.g., 9.99)" class="scanner-input w-full mb-2">
+                        <input id="itemStock" type="number" placeholder="Stock Quantity" class="scanner-input w-full mb-2">
+                        <button id="saveItem" class="btn-primary">Save Item</button>
+                        <button id="editItem" class="btn-primary hidden">Update Item</button>
                     </div>
-                    <p id="inventoryScannerFeedback" class="mt-2 hidden"></p>
-                    <button id="inventoryTestCamera" class="btn-secondary mb-2">Test Camera</button>
-                    <input id="barcodeInput" type="text" placeholder="Scan or Enter Barcode" class="scanner-input w-full mb-2">
-                    <div class="flex gap-2 mb-2">
-                        <button id="inventoryStartScanner" class="btn-primary">Scan Barcode</button>
-                        <button id="inventoryStopScanner" class="btn-danger hidden">Stop Scanner</button>
-                        <button id="inventoryManualScan" class="btn-primary">Submit Manual Barcode</button>
-                    </div>
-                    <input id="itemName" type="text" placeholder="Item Name" class="scanner-input w-full mb-2">
-                    <input id="itemPrice" type="number" step="0.01" placeholder="Price (e.g., 9.99)" class="scanner-input w-full mb-2">
-                    <input id="itemStock" type="number" placeholder="Stock Quantity" class="scanner-input w-full mb-2">
-                    <button id="saveItem" class="btn-primary">Save Item</button>
-                    <button id="editItem" class="btn-primary hidden">Update Item</button>
-                </div>
-                <!-- Item List -->
-                <div>
-                    <h3 class="text-lg font-medium text-gray-200 light-mode:text-gray-800 mb-2">Inventory</h3>
-                    <button id="viewInventoryBtn" class="btn-primary mb-2">View Inventory</button>
-                    <button id="exportInventoryBtn" class="btn-success mb-2 ml-2">Export Inventory</button>
-                    <input id="inventorySearch" type="text" placeholder="Search by name or barcode..." class="scanner-input w-full mb-2">
-                    <div id="lowStockAlert" class="notification hidden"></div>
-                    <div id="inventoryList" class="max-h-96 overflow-y-auto">
-                        <!-- Items will be dynamically added here -->
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- POS Section -->
-    <div id="posSection" class="container section hidden">
-        <div class="flex justify-between items-center mb-8">
-            <h1 class="text-4xl font-bold text-[#d4af37]">Point of Sale</h1>
-            <button onclick="showSection('landing')" class="btn-secondary">Back to Menu</button>
-        </div>
-        <div class="card">
-            <h2 class="text-2xl font-semibold text-[#d4af37] mb-4">Point of Sale</h2>
-            <div class="scanner-container">
-                <video id="posScannerVideo" class="scanner-video hidden" autoplay muted playsinline></video>
-                <div id="posScannerOverlay" class="scanner-overlay hidden"></div>
-            </div>
-            <p id="posScannerFeedback" class="mt-2 hidden"></p>
-            <button id="posTestCamera" class="btn-secondary mb-2">Test Camera</button>
-            <div class="flex gap-2 mb-2">
-                <input id="posBarcode" type="text" placeholder="Scan or Enter Barcode" class="scanner-input w-full">
-                <input id="posQuantity" type="number" min="1" value="1" placeholder="Quantity" class="scanner-input w-24">
-            </div>
-            <div class="flex gap-2 mb-4">
-                <button id="posStartScanner" class="btn-primary">Scan Barcode</button>
-                <button id="posStopScanner" class="btn-danger hidden">Stop Scanner</button>
-                <button id="posManualScan" class="btn-primary">Submit Manual Barcode</button>
-                <button id="orderFromSaved" class="btn-success">Order from Saved Items</button>
-            </div>
-            <!-- Order from Saved Items Modal -->
-            <div id="orderModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden">
-                <div class="card p-6 w-full max-w-lg">
-                    <h3 class="text-xl font-semibold text-[#d4af37] mb-4">Order from Saved Items</h3>
-                    <div id="savedItemsList" class="max-h-60 overflow-y-auto mb-4"></div>
-                    <button id="confirmOrder" class="btn-primary w-full">Confirm Order</button>
-                    <button id="closeOrderModal" class="btn-secondary w-full mt-2">Close</button>
-                </div>
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- Cart -->
-                <div>
-                    <h3 class="text-lg font-medium text-gray-200 light-mode:text-gray-800 mb-2">Cart</h3>
-                    <div id="cartList" class="max-h-96 overflow-y-auto">
-                        <!-- Cart items will be dynamically added here -->
-                    </div>
-                </div>
-                <!-- Summary -->
-                <div>
-                    <h3 class="text-lg font-medium text-gray-200 light-mode:text-gray-800 mb-2">Summary</h3>
-                    <div class="bg-gray-700 light-mode:bg-gray-50 p-4 rounded-md">
-                        <p class="text-gray-300 light-mode:text-gray-600">Total Items: <span id="totalItems">0</span></p>
-                        <p class="text-gray-300 light-mode:text-gray-600">Total Amount: $<span id="totalAmount">0.00</span></p>
-                        <button id="clearCart" class="btn-danger mt-4">Clear Cart</button>
-                        <button id="printReceipt" class="btn-success mt-4 ml-2">Checkout & Print Receipt</button>
+                    <!-- Item List -->
+                    <div>
+                        <h3 class="text-lg font-medium text-gray-200 light-mode:text-gray-800 mb-2">Inventory</h3>
+                        <button id="viewInventoryBtn" class="btn-primary mb-2">View Inventory</button>
+                        <button id="exportInventoryBtn" class="btn-success mb-2 ml-2">Export Inventory</button>
+                        <input id="inventorySearch" type="text" placeholder="Search by name or barcode..." class="scanner-input w-full mb-2">
+                        <div id="lowStockAlert" class="notification hidden"></div>
+                        <div id="inventoryList" class="max-h-96 overflow-y-auto">
+                            <!-- Items will be dynamically added here -->
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Scanner Section -->
-    <div id="scannerSection" class="container section hidden">
-        <div class="flex justify-between items-center mb-8">
-            <h1 class="text-4xl font-bold text-[#d4af37]">Barcode Scanner</h1>
-            <button onclick="showSection('landing')" class="btn-secondary">Back to Menu</button>
+        <!-- POS Section -->
+        <div id="posSection" class="container section hidden">
+            <div class="flex justify-between items-center mb-8">
+                <h1 class="text-4xl font-bold text-[#d4af37]">Point of Sale</h1>
+                <button onclick="showSection('landing')" class="btn-secondary">Back to Menu</button>
+            </div>
+            <div class="card">
+                <h2 class="text-2xl font-semibold text-[#d4af37] mb-4">Point of Sale</h2>
+                <div class="scanner-container">
+                    <video id="posScannerVideo" class="scanner-video hidden" autoplay muted playsinline></video>
+                    <div id="posScannerOverlay" class="scanner-overlay hidden"></div>
+                </div>
+                <p id="posScannerFeedback" class="mt-2 hidden"></p>
+                <button id="posTestCamera" class="btn-secondary mb-2">Test Camera</button>
+                <div class="flex gap-2 mb-2">
+                    <input id="posBarcode" type="text" placeholder="Scan or Enter Barcode" class="scanner-input w-full">
+                    <input id="posQuantity" type="number" min="1" value="1" placeholder="Quantity" class="scanner-input w-24">
+                </div>
+                <div class="flex gap-2 mb-4">
+                    <button id="posStartScanner" class="btn-primary">Scan Barcode</button>
+                    <button id="posStopScanner" class="btn-danger hidden">Stop Scanner</button>
+                    <button id="posManualScan" class="btn-primary">Submit Manual Barcode</button>
+                    <button id="orderFromSaved" class="btn-success">Order from Saved Items</button>
+                </div>
+                <!-- Order from Saved Items Modal -->
+                <div id="orderModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden">
+                    <div class="card p-6 w-full max-w-lg">
+                        <h3 class="text-xl font-semibold text-[#d4af37] mb-4">Order from Saved Items</h3>
+                        <div id="savedItemsList" class="max-h-60 overflow-y-auto mb-4"></div>
+                        <button id="confirmOrder" class="btn-primary w-full">Confirm Order</button>
+                        <button id="closeOrderModal" class="btn-secondary w-full mt-2">Close</button>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Cart -->
+                    <div>
+                        <h3 class="text-lg font-medium text-gray-200 light-mode:text-gray-800 mb-2">Cart</h3>
+                        <div id="cartList" class="max-h-96 overflow-y-auto">
+                            <!-- Cart items will be dynamically added here -->
+                        </div>
+                    </div>
+                    <!-- Summary -->
+                    <div>
+                        <h3 class="text-lg font-medium text-gray-200 light-mode:text-gray-800 mb-2">Summary</h3>
+                        <div class="bg-gray-700 light-mode:bg-gray-50 p-4 rounded-md">
+                            <p class="text-gray-300 light-mode:text-gray-600">Total Items: <span id="totalItems">0</span></p>
+                            <p class="text-gray-300 light-mode:text-gray-600">Total Amount: $<span id="totalAmount">0.00</span></p>
+                            <button id="clearCart" class="btn-danger mt-4">Clear Cart</button>
+                            <button id="printReceipt" class="btn-success mt-4 ml-2">Checkout & Print Receipt</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="card">
-            <h2 class="text-2xl font-semibold text-[#d4af37] mb-4">Scan a Barcode</h2>
-            <div class="scanner-container">
-                <video id="scannerVideo" class="scanner-video hidden" autoplay muted playsinline></video>
-                <div id="scannerOverlay" class="scanner-overlay hidden"></div>
-            </div>
-            <p id="scannerFeedback" class="mt-2 hidden"></p>
-            <button id="testCamera" class="btn-secondary mb-2">Test Camera</button>
-            <div class="mt-4">
-                <input id="manualBarcode" type="text" placeholder="Enter barcode manually" class="scanner-input w-full mb-2">
-                <button id="manualScan" class="btn-primary">Submit Manual Barcode</button>
-            </div>
-            <div class="flex gap-2 mt-4">
-                <button id="startScanner" class="btn-primary">Start Scanner</button>
-                <button id="stopScanner" class="btn-danger hidden">Stop Scanner</button>
-            </div>
-        </div>
-    </div>
 
-    <!-- Transaction History Section -->
-    <div id="historySection" class="container section hidden">
-        <div class="flex justify-between items-center mb-8">
-            <h1 class="text-4xl font-bold text-[#d4af37]">Transaction History</h1>
-            <button onclick="showSection('landing')" class="btn-secondary">Back to Menu</button>
-        </div>
-        <div class="card">
-            <h2 class="text-2xl font-semibold text-[#d4af37] mb-4">Past Transactions</h2>
-            <div id="transactionList" class="max-h-[600px] overflow-y-auto">
-                <!-- Transactions will be dynamically added here -->
+        <!-- Scanner Section -->
+        <div id="scannerSection" class="container section hidden">
+            <div class="flex justify-between items-center mb-8">
+                <h1 class="text-4xl font-bold text-[#d4af37]">Barcode Scanner</h1>
+                <button onclick="showSection('landing')" class="btn-secondary">Back to Menu</button>
+            </div>
+            <div class="card">
+                <h2 class="text-2xl font-semibold text-[#d4af37] mb-4">Scan a Barcode</h2>
+                <div class="scanner-container">
+                    <video id="scannerVideo" class="scanner-video hidden" autoplay muted playsinline></video>
+                    <div id="scannerOverlay" class="scanner-overlay hidden"></div>
+                </div>
+                <p id="scannerFeedback" class="mt-2 hidden"></p>
+                <button id="testCamera" class="btn-secondary mb-2">Test Camera</button>
+                <div class="mt-4">
+                    <input id="manualBarcode" type="text" placeholder="Enter barcode manually" class="scanner-input w-full mb-2">
+                    <button id="manualScan" class="btn-primary">Submit Manual Barcode</button>
+                </div>
+                <div class="flex gap-2 mt-4">
+                    <button id="startScanner" class="btn-primary">Start Scanner</button>
+                    <button id="stopScanner" class="btn-danger hidden">Stop Scanner</button>
+                </div>
             </div>
         </div>
-    </div>
 
-    <!-- Settings Section -->
-    <div id="settingsSection" class="container section hidden">
-        <div class="flex justify-between items-center mb-8">
-            <h1 class="text-4xl font-bold text-[#d4af37]">Settings</h1>
-            <button onclick="showSection('landing')" class="btn-secondary">Back to Menu</button>
+        <!-- Transaction History Section -->
+        <div id="historySection" class="container section hidden">
+            <div class="flex justify-between items-center mb-8">
+                <h1 class="text-4xl font-bold text-[#d4af37]">Transaction History</h1>
+                <button onclick="showSection('landing')" class="btn-secondary">Back to Menu</button>
+            </div>
+            <div class="card">
+                <h2 class="text-2xl font-semibold text-[#d4af37] mb-4">Past Transactions</h2>
+                <div id="transactionList" class="max-h-[600px] overflow-y-auto">
+                    <!-- Transactions will be dynamically added here -->
+                </div>
+            </div>
         </div>
-        <div class="card">
-            <h2 class="text-2xl font-semibold text-[#d4af37] mb-4">Customize Receipt</h2>
-            <div class="mb-4">
-                <label class="block text-gray-200 light-mode:text-gray-800 mb-2">Company Name</label>
-                <input id="companyName" type="text" placeholder="Enter your company name" class="scanner-input w-full mb-2">
+
+        <!-- Settings Section -->
+        <div id="settingsSection" class="container section hidden">
+            <div class="flex justify-between items-center mb-8">
+                <h1 class="text-4xl font-bold text-[#d4af37]">Settings</h1>
+                <button onclick="showSection('landing')" class="btn-secondary">Back to Menu</button>
             </div>
-            <div class="mb-4">
-                <label class="block text-gray-200 light-mode:text-gray-800 mb-2">Upload Logo</label>
-                <input id="logoInput" type="file" accept="image/*" class="mb-2">
-                <div id="logoPreview" class="mt-2"></div>
+            <div class="card">
+                <h2 class="text-2xl font-semibold text-[#d4af37] mb-4">Customize App Settings</h2>
+                <div class="mb-4">
+                    <h3 class="text-lg font-medium text-gray-200 light-mode:text-gray-800 mb-2">Update Login Credentials</h3>
+                    <input id="newUsername" type="text" placeholder="New Username" class="scanner-input w-full mb-2">
+                    <input id="newPassword" type="password" placeholder="New Password" class="scanner-input w-full mb-2">
+                    <button id="updateCredentials" class="btn-primary">Update Credentials</button>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-200 light-mode:text-gray-800 mb-2">Company Name</label>
+                    <input id="companyName" type="text" placeholder="Enter your company name" class="scanner-input w-full mb-2">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-200 light-mode:text-gray-800 mb-2">Upload Logo</label>
+                    <input id="logoInput" type="file" accept="image/*" class="mb-2">
+                    <div id="logoPreview" class="mt-2"></div>
+                </div>
+                <button id="saveSettings" class="btn-primary">Save Settings</button>
             </div>
-            <button id="saveSettings" class="btn-primary">Save Settings</button>
         </div>
     </div>
 
@@ -471,6 +499,9 @@
         let companyName = localStorage.getItem('companyName') || '';
         let logoDataUrl = localStorage.getItem('logoDataUrl') || '';
         let theme = localStorage.getItem('theme') || 'dark';
+        let username = localStorage.getItem('username') || 'admin';
+        let password = localStorage.getItem('password') || 'password123';
+        let isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
 
         // Apply theme on load
         document.body.classList.toggle('light-mode', theme === 'light');
@@ -480,6 +511,18 @@
 
         // DOM Elements
         const elements = {
+            loginPage: document.getElementById('loginPage'),
+            appHeader: document.getElementById('appHeader'),
+            appContent: document.getElementById('appContent'),
+            usernameInput: document.getElementById('usernameInput'),
+            passwordInput: document.getElementById('passwordInput'),
+            loginButton: document.getElementById('loginButton'),
+            loginError: document.getElementById('loginError'),
+            defaultUsername: document.getElementById('defaultUsername'),
+            defaultPassword: document.getElementById('defaultPassword'),
+            newUsername: document.getElementById('newUsername'),
+            newPassword: document.getElementById('newPassword'),
+            updateCredentials: document.getElementById('updateCredentials'),
             landingPage: document.getElementById('landingPage'),
             inventorySection: document.getElementById('inventorySection'),
             posSection: document.getElementById('posSection'),
@@ -545,15 +588,52 @@
 
         // Initialize
         try {
+            elements.defaultUsername.textContent = username;
+            elements.defaultPassword.textContent = password;
+            if (isLoggedIn) {
+                showApp();
+            } else {
+                elements.loginPage.classList.remove('hidden');
+            }
+        } catch (err) {
+            console.error('Initialization error:', err);
+            document.body.innerHTML = '<div class="text-center p-6 text-red-600">Failed to initialize application. Please refresh the page.</div>';
+        }
+
+        // Login Functionality
+        elements.loginButton.addEventListener('click', () => {
+            const inputUsername = elements.usernameInput.value.trim();
+            const inputPassword = elements.passwordInput.value.trim();
+            if (inputUsername === username && inputPassword === password) {
+                isLoggedIn = true;
+                localStorage.setItem('isLoggedIn', 'true');
+                showApp();
+            } else {
+                showFeedback(elements.loginError, 'Invalid username or password.', false);
+            }
+        });
+
+        // Logout Functionality
+        function logout() {
+            isLoggedIn = false;
+            localStorage.setItem('isLoggedIn', 'false');
+            elements.appHeader.classList.add('hidden');
+            elements.appContent.classList.add('hidden');
+            elements.loginPage.classList.remove('hidden');
+            elements.usernameInput.value = '';
+            elements.passwordInput.value = '';
+        }
+
+        // Show App After Login
+        function showApp() {
+            elements.loginPage.classList.add('hidden');
+            elements.appHeader.classList.remove('hidden');
+            elements.appContent.classList.remove('hidden');
             renderInventory();
             renderCart();
             renderTransactionHistory();
             renderSettings();
             showSection('landing');
-            console.log('Page initialized successfully');
-        } catch (err) {
-            console.error('Initialization error:', err);
-            document.body.innerHTML = '<div class="text-center p-6 text-red-600">Failed to initialize application. Please refresh the page.</div>';
         }
 
         // Toggle Theme
@@ -608,6 +688,21 @@
         // Generate Order Number
         function generateOrderNumber() {
             return 'ORD' + Math.floor(Math.random() * 1000000).toString().padStart(6, '0');
+        }
+
+        // Beep Sound on Scan
+        function playBeep() {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = ctx.createOscillator();
+                oscillator.type = 'sine';
+                oscillator.frequency.setValueAtTime(800, ctx.currentTime); // Frequency in Hz
+                oscillator.connect(ctx.destination);
+                oscillator.start();
+                oscillator.stop(ctx.currentTime + 0.1); // Beep duration (0.1 seconds)
+            } catch (err) {
+                console.error('Error playing beep sound:', err);
+            }
         }
 
         // Save or Update Item
@@ -799,6 +894,7 @@
                 }
                 renderCart();
                 showFeedback(elements.posScannerFeedback, `Added ${quantity} x ${item.name} to cart!`, true);
+                playBeep();
                 elements.posScannerVideo.classList.add('scanner-success');
                 setTimeout(() => elements.posScannerVideo.classList.remove('scanner-success'), 500);
                 elements.posBarcode.value = '';
@@ -1119,6 +1215,8 @@
         function renderSettings() {
             try {
                 elements.companyName.value = companyName;
+                elements.newUsername.value = username;
+                elements.newPassword.value = password;
                 if (logoDataUrl) {
                     const img = document.createElement('img');
                     img.src = logoDataUrl;
@@ -1130,6 +1228,29 @@
                 console.error('Error rendering settings:', err);
             }
         }
+
+        // Update Credentials
+        elements.updateCredentials.addEventListener('click', () => {
+            try {
+                const newUsername = elements.newUsername.value.trim();
+                const newPassword = elements.newPassword.value.trim();
+                if (newUsername && newPassword) {
+                    username = newUsername;
+                    password = newPassword;
+                    localStorage.setItem('username', username);
+                    localStorage.setItem('password', password);
+                    elements.defaultUsername.textContent = username;
+                    elements.defaultPassword.textContent = password;
+                    alert('Credentials updated successfully! Please log in again.');
+                    logout();
+                } else {
+                    alert('Please enter a valid username and password.');
+                }
+            } catch (err) {
+                console.error('Error updating credentials:', err);
+                alert('Error updating credentials. Please try again.');
+            }
+        });
 
         // Handle Logo Upload and Company Name
         elements.logoInput.addEventListener('change', (event) => {
@@ -1294,6 +1415,7 @@
                             const barcode = data.codeResult.code;
                             lastScannedBarcode = barcode;
                             showFeedback(feedbackElement, `Scanned: ${barcode}`, true);
+                            playBeep();
                             videoElement.classList.add('scanner-success');
                             if (section === 'pos') {
                                 const quantity = parseInt(elements.posQuantity.value) || 1;
@@ -1391,67 +1513,4 @@
             try {
                 const barcode = elements.barcodeInput.value.trim();
                 if (barcode) {
-                    elements.barcodeInput.value = barcode;
-                    showFeedback(elements.inventoryScannerFeedback, `Manual barcode entered: ${barcode}`, true);
-                } else {
-                    showFeedback(elements.inventoryScannerFeedback, 'Please enter a barcode.', false);
-                }
-            } catch (err) {
-                console.error('Error in inventory manual scan:', err);
-                showFeedback(elements.inventoryScannerFeedback, 'Error processing manual barcode.', false);
-            }
-        });
-
-        // POS Scanner
-        elements.posStartScanner.addEventListener('click', () => {
-            startScanner('pos', elements.posScannerVideo, elements.posScannerOverlay, elements.posScannerFeedback, elements.posStartScanner, elements.posStopScanner, (barcode, quantity) => {
-                addToCart(barcode, quantity);
-            });
-        });
-
-        elements.posStopScanner.addEventListener('click', stopScannerFunc);
-
-        // Main Scanner Section
-        elements.startScanner.addEventListener('click', () => {
-            startScanner('scanner', elements.scannerVideo, elements.scannerOverlay, elements.scannerFeedback, elements.startScanner, elements.stopScanner, (barcode) => {
-                let message = `Confirmed Barcode: ${barcode}`;
-                if (inventory[barcode]) {
-                    const item = inventory[barcode];
-                    message += ` - ${item.name} ($${item.price.toFixed(2)})`;
-                    cart.push({ barcode, ...item, quantity: 1 });
-                    renderCart();
-                } else {
-                    message += ' - Item not found in inventory.';
-                }
-                showFeedback(elements.scannerFeedback, message, true);
-            });
-        });
-
-        elements.stopScanner.addEventListener('click', stopScannerFunc);
-
-        elements.manualScan.addEventListener('click', () => {
-            try {
-                const barcode = elements.manualBarcode.value.trim();
-                if (barcode) {
-                    let message = `Manual Barcode: ${barcode}`;
-                    if (inventory[barcode]) {
-                        const item = inventory[barcode];
-                        message += ` - ${item.name} ($${item.price.toFixed(2)})`;
-                        cart.push({ barcode, ...item, quantity: 1 });
-                        renderCart();
-                    } else {
-                        message += ' - Item not found in inventory.';
-                    }
-                    elements.manualBarcode.value = '';
-                    showFeedback(elements.scannerFeedback, message, true);
-                } else {
-                    showFeedback(elements.scannerFeedback, 'Please enter a barcode.', false);
-                }
-            } catch (err) {
-                console.error('Error in main scanner manual scan:', err);
-                showFeedback(elements.scannerFeedback, 'Error processing manual barcode.', false);
-            }
-        });
-    </script>
-</body>
-</html>
+                    elements
