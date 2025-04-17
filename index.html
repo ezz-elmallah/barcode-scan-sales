@@ -6,76 +6,130 @@
     <title>SuperScan - Premium Inventory & POS</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/quagga@0.12.1/dist/quagga.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body {
-            font-family: 'Montserrat', sans-serif;
-            background: linear-gradient(135deg, #1a1a1a 0%, #2c2c2c 100%);
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #1e3a8a 0%, #6b21a8 100%);
             color: #f5f5f5;
+            margin: 0;
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+        body.light-mode {
+            background: linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%);
+            color: #1a1a1a;
         }
         .container {
             max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: #1a1a1a;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+        .header.light-mode {
+            background: #ffffff;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        .header a {
+            color: #d4af37;
+            margin: 0 1rem;
+            font-weight: 600;
+            transition: color 0.3s ease;
+        }
+        .header a:hover {
+            color: #b8972e;
+        }
+        .header .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #d4af37;
         }
         .card {
-            background: #ffffff;
+            background: #2c2c2c;
             border-radius: 12px;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-            transition: transform 0.2s ease;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            transition: transform 0.2s ease, background 0.3s ease;
+        }
+        .card.light-mode {
+            background: #ffffff;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
         }
         .card:hover {
-            transform: translateY(-3px);
+            transform: translateY(-5px);
         }
         .btn-primary {
             background: #d4af37;
             color: #1a1a1a;
             font-weight: 600;
-            padding: 10px 20px;
+            padding: 0.75rem 1.5rem;
             border-radius: 8px;
-            transition: background 0.3s ease;
+            transition: background 0.3s ease, transform 0.1s ease;
         }
         .btn-primary:hover {
             background: #b8972e;
+            transform: scale(1.05);
         }
         .btn-secondary {
             background: #4b4b4b;
             color: #f5f5f5;
             font-weight: 600;
-            padding: 10px 20px;
+            padding: 0.75rem 1.5rem;
             border-radius: 8px;
-            transition: background 0.3s ease;
+            transition: background 0.3s ease, transform 0.1s ease;
         }
         .btn-secondary:hover {
             background: #3a3a3a;
+            transform: scale(1.05);
         }
         .btn-danger {
             background: #dc2626;
             color: #ffffff;
             font-weight: 600;
-            padding: 10px 20px;
+            padding: 0.75rem 1.5rem;
             border-radius: 8px;
-            transition: background 0.3s ease;
+            transition: background 0.3s ease, transform 0.1s ease;
         }
         .btn-danger:hover {
             background: #b91c1c;
+            transform: scale(1.05);
         }
         .btn-success {
             background: #10b981;
             color: #ffffff;
             font-weight: 600;
-            padding: 10px 20px;
+            padding: 0.75rem 1.5rem;
             border-radius: 8px;
-            transition: background 0.3s ease;
+            transition: background 0.3s ease, transform 0.1s ease;
         }
         .btn-success:hover {
             background: #059669;
+            transform: scale(1.05);
         }
         .scanner-input {
             border: 2px solid #d4af37;
             border-radius: 8px;
-            padding: 10px;
-            background: #2c2c2c;
+            padding: 0.75rem;
+            background: #3a3a3a;
             color: #f5f5f5;
-            transition: border-color 0.3s ease;
+            transition: border-color 0.3s ease, background 0.3s ease;
+        }
+        .scanner-input.light-mode {
+            background: #f5f5f5;
+            color: #1a1a1a;
+            border: 2px solid #d4af37;
         }
         .scanner-input:focus {
             border-color: #b8972e;
@@ -149,6 +203,26 @@
             border-radius: 50%;
             margin-bottom: 10px;
         }
+        .low-stock {
+            background: rgba(220, 38, 38, 0.1);
+            border-left: 4px solid #dc2626;
+        }
+        .notification {
+            background: #dc2626;
+            color: #ffffff;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+        .section {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+        .section.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
         @media print {
             body {
                 background: #ffffff;
@@ -171,49 +245,71 @@
                 width: 80%;
                 height: 50px;
             }
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .header a {
+                margin: 0.5rem 0;
+            }
         }
     </style>
 </head>
 <body class="min-h-screen">
-    <div id="landingPage" class="container mx-auto p-6">
+    <header class="header">
+        <div class="logo">SuperScan</div>
+        <nav>
+            <a href="#" onclick="showSection('landing'); return false;">Home</a>
+            <a href="#" onclick="showSection('inventory'); return false;">Inventory</a>
+            <a href="#" onclick="showSection('pos'); return false;">POS</a>
+            <a href="#" onclick="showSection('scanner'); return false;">Scanner</a>
+            <a href="#" onclick="showSection('history'); return false;">History</a>
+            <a href="#" onclick="showSection('settings'); return false;">Settings</a>
+            <a href="#" onclick="toggleTheme(); return false;">Toggle Theme</a>
+        </nav>
+    </header>
+
+    <div style="height: 80px;"></div>
+
+    <div id="landingPage" class="container section">
         <h1 class="text-5xl font-bold text-center text-[#d4af37] mb-8">SuperScan</h1>
         <p class="text-center text-gray-300 mb-12 text-lg">Premium Inventory & POS System</p>
         <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
             <div class="card p-6 text-center cursor-pointer" onclick="showSection('inventory')">
                 <h2 class="text-xl font-semibold text-[#d4af37] mb-2">Inventory Management</h2>
-                <p class="text-gray-600">Manage your stock with ease.</p>
+                <p class="text-gray-400 light-mode:text-gray-600">Manage your stock with ease.</p>
             </div>
             <div class="card p-6 text-center cursor-pointer" onclick="showSection('pos')">
                 <h2 class="text-xl font-semibold text-[#d4af37] mb-2">Point of Sale</h2>
-                <p class="text-gray-600">Process sales efficiently.</p>
+                <p class="text-gray-400 light-mode:text-gray-600">Process sales efficiently.</p>
             </div>
             <div class="card p-6 text-center cursor-pointer" onclick="showSection('scanner')">
                 <h2 class="text-xl font-semibold text-[#d4af37] mb-2">Barcode Scanner</h2>
-                <p class="text-gray-600">Scan barcodes seamlessly.</p>
+                <p class="text-gray-400 light-mode:text-gray-600">Scan barcodes seamlessly.</p>
             </div>
             <div class="card p-6 text-center cursor-pointer" onclick="showSection('history')">
                 <h2 class="text-xl font-semibold text-[#d4af37] mb-2">Transaction History</h2>
-                <p class="text-gray-600">View all past transactions.</p>
+                <p class="text-gray-400 light-mode:text-gray-600">View all past transactions.</p>
             </div>
             <div class="card p-6 text-center cursor-pointer" onclick="showSection('settings')">
                 <h2 class="text-xl font-semibold text-[#d4af37] mb-2">Settings</h2>
-                <p class="text-gray-600">Customize your app settings.</p>
+                <p class="text-gray-400 light-mode:text-gray-600">Customize your app settings.</p>
             </div>
         </div>
     </div>
 
     <!-- Inventory Management Section -->
-    <div id="inventorySection" class="container mx-auto p-6 hidden">
+    <div id="inventorySection" class="container section hidden">
         <div class="flex justify-between items-center mb-8">
             <h1 class="text-4xl font-bold text-[#d4af37]">Inventory Management</h1>
             <button onclick="showSection('landing')" class="btn-secondary">Back to Menu</button>
         </div>
-        <div class="card p-6 mb-8">
+        <div class="card">
             <h2 class="text-2xl font-semibold text-[#d4af37] mb-4">Manage Inventory</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <!-- Add/Edit Item -->
                 <div>
-                    <h3 class="text-lg font-medium text-gray-800 mb-2">Add New Item</h3>
+                    <h3 class="text-lg font-medium text-gray-200 light-mode:text-gray-800 mb-2">Add New Item</h3>
                     <div class="scanner-container">
                         <video id="inventoryScannerVideo" class="scanner-video hidden" autoplay muted playsinline></video>
                         <div id="inventoryScannerOverlay" class="scanner-overlay hidden"></div>
@@ -234,7 +330,11 @@
                 </div>
                 <!-- Item List -->
                 <div>
-                    <h3 class="text-lg font-medium text-gray-800 mb-2">Inventory</h3>
+                    <h3 class="text-lg font-medium text-gray-200 light-mode:text-gray-800 mb-2">Inventory</h3>
+                    <button id="viewInventoryBtn" class="btn-primary mb-2">View Inventory</button>
+                    <button id="exportInventoryBtn" class="btn-success mb-2 ml-2">Export Inventory</button>
+                    <input id="inventorySearch" type="text" placeholder="Search by name or barcode..." class="scanner-input w-full mb-2">
+                    <div id="lowStockAlert" class="notification hidden"></div>
                     <div id="inventoryList" class="max-h-96 overflow-y-auto">
                         <!-- Items will be dynamically added here -->
                     </div>
@@ -244,12 +344,12 @@
     </div>
 
     <!-- POS Section -->
-    <div id="posSection" class="container mx-auto p-6 hidden">
+    <div id="posSection" class="container section hidden">
         <div class="flex justify-between items-center mb-8">
             <h1 class="text-4xl font-bold text-[#d4af37]">Point of Sale</h1>
             <button onclick="showSection('landing')" class="btn-secondary">Back to Menu</button>
         </div>
-        <div class="card p-6">
+        <div class="card">
             <h2 class="text-2xl font-semibold text-[#d4af37] mb-4">Point of Sale</h2>
             <div class="scanner-container">
                 <video id="posScannerVideo" class="scanner-video hidden" autoplay muted playsinline></video>
@@ -257,7 +357,10 @@
             </div>
             <p id="posScannerFeedback" class="mt-2 hidden"></p>
             <button id="posTestCamera" class="btn-secondary mb-2">Test Camera</button>
-            <input id="posBarcode" type="text" placeholder="Scan or Enter Barcode" class="scanner-input w-full mb-2">
+            <div class="flex gap-2 mb-2">
+                <input id="posBarcode" type="text" placeholder="Scan or Enter Barcode" class="scanner-input w-full">
+                <input id="posQuantity" type="number" min="1" value="1" placeholder="Quantity" class="scanner-input w-24">
+            </div>
             <div class="flex gap-2 mb-4">
                 <button id="posStartScanner" class="btn-primary">Scan Barcode</button>
                 <button id="posStopScanner" class="btn-danger hidden">Stop Scanner</button>
@@ -276,17 +379,17 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <!-- Cart -->
                 <div>
-                    <h3 class="text-lg font-medium text-gray-800 mb-2">Cart</h3>
+                    <h3 class="text-lg font-medium text-gray-200 light-mode:text-gray-800 mb-2">Cart</h3>
                     <div id="cartList" class="max-h-96 overflow-y-auto">
                         <!-- Cart items will be dynamically added here -->
                     </div>
                 </div>
                 <!-- Summary -->
                 <div>
-                    <h3 class="text-lg font-medium text-gray-800 mb-2">Summary</h3>
-                    <div class="bg-gray-50 p-4 rounded-md">
-                        <p class="text-gray-600">Total Items: <span id="totalItems">0</span></p>
-                        <p class="text-gray-600">Total Amount: $<span id="totalAmount">0.00</span></p>
+                    <h3 class="text-lg font-medium text-gray-200 light-mode:text-gray-800 mb-2">Summary</h3>
+                    <div class="bg-gray-700 light-mode:bg-gray-50 p-4 rounded-md">
+                        <p class="text-gray-300 light-mode:text-gray-600">Total Items: <span id="totalItems">0</span></p>
+                        <p class="text-gray-300 light-mode:text-gray-600">Total Amount: $<span id="totalAmount">0.00</span></p>
                         <button id="clearCart" class="btn-danger mt-4">Clear Cart</button>
                         <button id="printReceipt" class="btn-success mt-4 ml-2">Checkout & Print Receipt</button>
                     </div>
@@ -296,12 +399,12 @@
     </div>
 
     <!-- Scanner Section -->
-    <div id="scannerSection" class="container mx-auto p-6 hidden">
+    <div id="scannerSection" class="container section hidden">
         <div class="flex justify-between items-center mb-8">
             <h1 class="text-4xl font-bold text-[#d4af37]">Barcode Scanner</h1>
             <button onclick="showSection('landing')" class="btn-secondary">Back to Menu</button>
         </div>
-        <div class="card p-6">
+        <div class="card">
             <h2 class="text-2xl font-semibold text-[#d4af37] mb-4">Scan a Barcode</h2>
             <div class="scanner-container">
                 <video id="scannerVideo" class="scanner-video hidden" autoplay muted playsinline></video>
@@ -321,12 +424,12 @@
     </div>
 
     <!-- Transaction History Section -->
-    <div id="historySection" class="container mx-auto p-6 hidden">
+    <div id="historySection" class="container section hidden">
         <div class="flex justify-between items-center mb-8">
             <h1 class="text-4xl font-bold text-[#d4af37]">Transaction History</h1>
             <button onclick="showSection('landing')" class="btn-secondary">Back to Menu</button>
         </div>
-        <div class="card p-6">
+        <div class="card">
             <h2 class="text-2xl font-semibold text-[#d4af37] mb-4">Past Transactions</h2>
             <div id="transactionList" class="max-h-[600px] overflow-y-auto">
                 <!-- Transactions will be dynamically added here -->
@@ -335,19 +438,19 @@
     </div>
 
     <!-- Settings Section -->
-    <div id="settingsSection" class="container mx-auto p-6 hidden">
+    <div id="settingsSection" class="container section hidden">
         <div class="flex justify-between items-center mb-8">
             <h1 class="text-4xl font-bold text-[#d4af37]">Settings</h1>
             <button onclick="showSection('landing')" class="btn-secondary">Back to Menu</button>
         </div>
-        <div class="card p-6">
+        <div class="card">
             <h2 class="text-2xl font-semibold text-[#d4af37] mb-4">Customize Receipt</h2>
             <div class="mb-4">
-                <label class="block text-gray-800 mb-2">Company Name</label>
+                <label class="block text-gray-200 light-mode:text-gray-800 mb-2">Company Name</label>
                 <input id="companyName" type="text" placeholder="Enter your company name" class="scanner-input w-full mb-2">
             </div>
             <div class="mb-4">
-                <label class="block text-gray-800 mb-2">Upload Logo</label>
+                <label class="block text-gray-200 light-mode:text-gray-800 mb-2">Upload Logo</label>
                 <input id="logoInput" type="file" accept="image/*" class="mb-2">
                 <div id="logoPreview" class="mt-2"></div>
             </div>
@@ -367,6 +470,13 @@
         let scanCooldown = false;
         let companyName = localStorage.getItem('companyName') || '';
         let logoDataUrl = localStorage.getItem('logoDataUrl') || '';
+        let theme = localStorage.getItem('theme') || 'dark';
+
+        // Apply theme on load
+        document.body.classList.toggle('light-mode', theme === 'light');
+        document.querySelectorAll('.card, .scanner-input, .header').forEach(el => {
+            el.classList.toggle('light-mode', theme === 'light');
+        });
 
         // DOM Elements
         const elements = {
@@ -383,7 +493,12 @@
             saveItem: document.getElementById('saveItem'),
             editItem: document.getElementById('editItem'),
             inventoryList: document.getElementById('inventoryList'),
+            inventorySearch: document.getElementById('inventorySearch'),
+            lowStockAlert: document.getElementById('lowStockAlert'),
+            viewInventoryBtn: document.getElementById('viewInventoryBtn'),
+            exportInventoryBtn: document.getElementById('exportInventoryBtn'),
             posBarcode: document.getElementById('posBarcode'),
+            posQuantity: document.getElementById('posQuantity'),
             cartList: document.getElementById('cartList'),
             totalItems: document.getElementById('totalItems'),
             totalAmount: document.getElementById('totalAmount'),
@@ -434,40 +549,51 @@
             renderCart();
             renderTransactionHistory();
             renderSettings();
+            showSection('landing');
             console.log('Page initialized successfully');
         } catch (err) {
             console.error('Initialization error:', err);
             document.body.innerHTML = '<div class="text-center p-6 text-red-600">Failed to initialize application. Please refresh the page.</div>';
         }
 
+        // Toggle Theme
+        function toggleTheme() {
+            theme = theme === 'dark' ? 'light' : 'dark';
+            localStorage.setItem('theme', theme);
+            document.body.classList.toggle('light-mode', theme === 'light');
+            document.querySelectorAll('.card, .scanner-input, .header').forEach(el => {
+                el.classList.toggle('light-mode', theme === 'light');
+            });
+        }
+
         // Show Section
         function showSection(section) {
             try {
-                elements.landingPage.classList.add('hidden');
-                elements.inventorySection.classList.add('hidden');
-                elements.posSection.classList.add('hidden');
-                elements.scannerSection.classList.add('hidden');
-                elements.historySection.classList.add('hidden');
-                elements.settingsSection.classList.add('hidden');
+                const sections = [elements.landingPage, elements.inventorySection, elements.posSection, elements.scannerSection, elements.historySection, elements.settingsSection];
+                sections.forEach(s => s.classList.add('hidden'));
+                sections.forEach(s => s.classList.remove('visible'));
 
+                let targetSection;
                 if (section === 'landing') {
-                    elements.landingPage.classList.remove('hidden');
+                    targetSection = elements.landingPage;
                     stopScannerFunc();
                 } else if (section === 'inventory') {
-                    elements.inventorySection.classList.remove('hidden');
+                    targetSection = elements.inventorySection;
                     stopScannerFunc();
                 } else if (section === 'pos') {
-                    elements.posSection.classList.remove('hidden');
+                    targetSection = elements.posSection;
                     stopScannerFunc();
                 } else if (section === 'scanner') {
-                    elements.scannerSection.classList.remove('hidden');
+                    targetSection = elements.scannerSection;
                 } else if (section === 'history') {
-                    elements.historySection.classList.remove('hidden');
+                    targetSection = elements.historySection;
                     stopScannerFunc();
                 } else if (section === 'settings') {
-                    elements.settingsSection.classList.remove('hidden');
+                    targetSection = elements.settingsSection;
                     stopScannerFunc();
                 }
+                targetSection.classList.remove('hidden');
+                setTimeout(() => targetSection.classList.add('visible'), 10);
                 console.log(`Switched to section: ${section}`);
             } catch (err) {
                 console.error('Error in showSection:', err);
@@ -562,20 +688,65 @@
             }
         }
 
-        // Render Inventory
-        function renderInventory() {
+        // Search Inventory
+        elements.inventorySearch.addEventListener('input', () => {
             try {
-                elements.inventoryList.innerHTML = '';
+                const query = elements.inventorySearch.value.toLowerCase();
+                renderInventory(query);
+            } catch (err) {
+                console.error('Error searching inventory:', err);
+                showFeedback(elements.inventoryScannerFeedback, 'Error searching inventory.', false);
+            }
+        });
+
+        // View Inventory Button
+        elements.viewInventoryBtn.addEventListener('click', () => {
+            elements.inventoryList.scrollIntoView({ behavior: 'smooth' });
+            elements.inventoryList.style.animation = 'highlight 1s ease';
+        });
+
+        // Export Inventory to CSV
+        elements.exportInventoryBtn.addEventListener('click', () => {
+            try {
+                const csv = ['Barcode,Name,Price,Stock'];
                 for (const barcode in inventory) {
                     const item = inventory[barcode];
+                    csv.push(`${barcode},${item.name},${item.price},${item.stock}`);
+                }
+                const csvContent = csv.join('\n');
+                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = 'inventory_export.csv';
+                link.click();
+                URL.revokeObjectURL(link.href);
+            } catch (err) {
+                console.error('Error exporting inventory:', err);
+                showFeedback(elements.inventoryScannerFeedback, 'Error exporting inventory.', false);
+            }
+        });
+
+        // Render Inventory
+        function renderInventory(searchQuery = '') {
+            try {
+                elements.inventoryList.innerHTML = '';
+                let lowStockItems = 0;
+                for (const barcode in inventory) {
+                    const item = inventory[barcode];
+                    const matchesSearch = !searchQuery || 
+                        item.name.toLowerCase().includes(searchQuery) || 
+                        barcode.toLowerCase().includes(searchQuery);
+                    if (!matchesSearch) continue;
+
+                    if (item.stock < 5) lowStockItems++;
                     const itemCard = document.createElement('div');
-                    itemCard.className = 'bg-gray-50 p-4 rounded-md mb-2 flex justify-between items-center';
+                    itemCard.className = `bg-gray-700 light-mode:bg-gray-50 p-4 rounded-md mb-2 flex justify-between items-center ${item.stock < 5 ? 'low-stock' : ''}`;
                     itemCard.innerHTML = `
                         <div>
-                            <p class="font-medium text-gray-800">${item.name}</p>
-                            <p class="text-sm text-gray-600">Barcode: ${barcode}</p>
-                            <p class="text-sm text-gray-600">Price: $${item.price.toFixed(2)}</p>
-                            <p class="text-sm text-gray-600">Stock: ${item.stock}</p>
+                            <p class="font-medium text-gray-200 light-mode:text-gray-800">${item.name}</p>
+                            <p class="text-sm text-gray-400 light-mode:text-gray-600">Barcode: ${barcode}</p>
+                            <p class="text-sm text-gray-400 light-mode:text-gray-600">Price: $${item.price.toFixed(2)}</p>
+                            <p class="text-sm text-gray-400 light-mode:text-gray-600">Stock: ${item.stock}</p>
                         </div>
                         <div>
                             <button onclick="prepareEdit('${barcode}')" class="text-[#d4af37] hover:text-[#b8972e] mr-2">Edit</button>
@@ -583,6 +754,12 @@
                         </div>
                     `;
                     elements.inventoryList.appendChild(itemCard);
+                }
+                if (lowStockItems > 0) {
+                    elements.lowStockAlert.classList.remove('hidden');
+                    elements.lowStockAlert.textContent = `⚠️ ${lowStockItems} item(s) are low on stock (less than 5 units).`;
+                } else {
+                    elements.lowStockAlert.classList.add('hidden');
                 }
             } catch (err) {
                 console.error('Error rendering inventory:', err);
@@ -602,37 +779,48 @@
             }
         }
 
-        // POS: Add to Cart
-        function addToCart(barcode) {
+        // POS: Add to Cart with Quantity
+        function addToCart(barcode, quantity = 1) {
             try {
                 if (!inventory[barcode]) {
                     showFeedback(elements.posScannerFeedback, 'Item not found in inventory.', false);
                     return;
                 }
                 const item = inventory[barcode];
-                if (item.stock <= 0) {
-                    showFeedback(elements.posScannerFeedback, `Out of stock: ${item.name}.`, false);
+                if (item.stock < quantity) {
+                    showFeedback(elements.posScannerFeedback, `Insufficient stock for ${item.name}. Only ${item.stock} available.`, false);
                     return;
                 }
-                cart.push({ barcode, ...item });
+                const cartItem = cart.find(i => i.barcode === barcode);
+                if (cartItem) {
+                    cartItem.quantity += quantity;
+                } else {
+                    cart.push({ barcode, ...item, quantity });
+                }
                 renderCart();
-                showFeedback(elements.posScannerFeedback, `Added ${item.name} to cart!`, true);
+                showFeedback(elements.posScannerFeedback, `Added ${quantity} x ${item.name} to cart!`, true);
                 elements.posScannerVideo.classList.add('scanner-success');
                 setTimeout(() => elements.posScannerVideo.classList.remove('scanner-success'), 500);
                 elements.posBarcode.value = '';
+                elements.posQuantity.value = 1;
             } catch (err) {
                 console.error('Error adding to cart:', err);
                 showFeedback(elements.posScannerFeedback, 'Error adding item to cart.', false);
             }
         }
 
-        elements.posBarcode.addEventListener('input', () => {
+        elements.posManualScan.addEventListener('click', () => {
             try {
                 const barcode = elements.posBarcode.value.trim();
-                if (barcode) addToCart(barcode);
+                const quantity = parseInt(elements.posQuantity.value) || 1;
+                if (barcode && quantity > 0) {
+                    addToCart(barcode, quantity);
+                } else {
+                    showFeedback(elements.posScannerFeedback, 'Please enter a barcode and valid quantity.', false);
+                }
             } catch (err) {
-                console.error('Error in POS barcode input:', err);
-                showFeedback(elements.posScannerFeedback, 'Error processing barcode input.', false);
+                console.error('Error in POS manual scan:', err);
+                showFeedback(elements.posScannerFeedback, 'Error processing manual barcode.', false);
             }
         });
 
@@ -643,12 +831,12 @@
                 for (const barcode in inventory) {
                     const item = inventory[barcode];
                     const itemRow = document.createElement('div');
-                    itemRow.className = 'flex justify-between items-center bg-gray-50 p-3 rounded-md mb-2';
+                    itemRow.className = 'flex justify-between items-center bg-gray-700 light-mode:bg-gray-50 p-3 rounded-md mb-2';
                     itemRow.innerHTML = `
                         <div>
-                            <p class="font-medium text-gray-800">${item.name}</p>
-                            <p class="text-sm text-gray-600">Price: $${item.price.toFixed(2)}</p>
-                            <p class="text-sm text-gray-600">Stock: ${item.stock}</p>
+                            <p class="font-medium text-gray-200 light-mode:text-gray-800">${item.name}</p>
+                            <p class="text-sm text-gray-400 light-mode:text-gray-600">Price: $${item.price.toFixed(2)}</p>
+                            <p class="text-sm text-gray-400 light-mode:text-gray-600">Stock: ${item.stock}</p>
                         </div>
                         <div class="flex items-center">
                             <input type="number" min="1" max="${item.stock}" value="1" class="quantity-input w-16 p-1 border rounded-md mr-2" data-barcode="${barcode}">
@@ -665,9 +853,7 @@
                         const quantityInput = btn.parentElement.querySelector('.quantity-input');
                         const quantity = parseInt(quantityInput.value);
                         if (quantity > 0 && quantity <= inventory[barcode].stock) {
-                            for (let i = 0; i < quantity; i++) {
-                                addToCart(barcode);
-                            }
+                            addToCart(barcode, quantity);
                         } else {
                             showFeedback(elements.posScannerFeedback, 'Invalid quantity or insufficient stock.', false);
                         }
@@ -695,20 +881,24 @@
             try {
                 elements.cartList.innerHTML = '';
                 let total = 0;
+                let totalItems = 0;
                 cart.forEach((item, index) => {
-                    total += item.price;
+                    const itemTotal = item.price * item.quantity;
+                    total += itemTotal;
+                    totalItems += item.quantity;
                     const cartItem = document.createElement('div');
-                    cartItem.className = 'bg-gray-50 p-4 rounded-md mb-2 flex justify-between items-center';
+                    cartItem.className = 'bg-gray-700 light-mode:bg-gray-50 p-4 rounded-md mb-2 flex justify-between items-center';
                     cartItem.innerHTML = `
                         <div>
-                            <p class="font-medium text-gray-800">${item.name}</p>
-                            <p class="text-sm text-gray-600">Price: $${item.price.toFixed(2)}</p>
+                            <p class="font-medium text-gray-200 light-mode:text-gray-800">${item.name}</p>
+                            <p class="text-sm text-gray-400 light-mode:text-gray-600">Price: $${item.price.toFixed(2)} x ${item.quantity}</p>
+                            <p class="text-sm text-gray-400 light-mode:text-gray-600">Total: $${itemTotal.toFixed(2)}</p>
                         </div>
                         <button onclick="removeFromCart(${index})" class="text-red-500 hover:text-red-600">Remove</button>
                     `;
                     elements.cartList.appendChild(cartItem);
                 });
-                elements.totalItems.textContent = cart.length;
+                elements.totalItems.textContent = totalItems;
                 elements.totalAmount.textContent = total.toFixed(2);
             } catch (err) {
                 console.error('Error rendering cart:', err);
@@ -740,6 +930,46 @@
             }
         });
 
+        // Generate Receipt HTML
+        function generateReceipt(transaction, totalItems) {
+            return `
+                <div class="receipt">
+                    ${logoDataUrl ? `<img src="${logoDataUrl}" class="receipt-logo" alt="Company Logo">` : '<div class="receipt-logo">No Logo</div>'}
+                    <h2 class="text-2xl font-bold text-center text-gray-800 mt-4">${companyName ? companyName + ' Receipt' : 'Receipt'}</h2>
+                    <p class="text-center text-gray-600 mt-2">Transaction ID: ${transaction.id}</p>
+                    <p class="text-center text-gray-600">Order Number: ${transaction.orderNumber}</p>
+                    <p class="text-center text-gray-600">Date: ${transaction.date}</p>
+                    <hr class="my-4 border-gray-300">
+                    <table class="w-full mt-4 border-collapse">
+                        <thead>
+                            <tr class="border-b border-gray-300">
+                                <th class="text-left py-2 text-gray-800">Item</th>
+                                <th class="text-center py-2 text-gray-800">Qty</th>
+                                <th class="text-right py-2 text-gray-800">Price</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${transaction.items.map(item => `
+                                <tr>
+                                    <td class="py-2 text-gray-800">${item.name}</td>
+                                    <td class="text-center py-2 text-gray-800">${item.quantity}</td>
+                                    <td class="text-right py-2 text-gray-800">$${(item.price * item.quantity).toFixed(2)}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                        <tfoot>
+                            <tr class="border-t border-gray-300 font-semibold">
+                                <td class="py-2 text-gray-800">Total (${totalItems} items)</td>
+                                <td></td>
+                                <td class="text-right py-2 text-gray-800">$${transaction.total.toFixed(2)}</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                    <p class="text-center text-gray-600 mt-4">Thank you for your purchase!</p>
+                </div>
+            `;
+        }
+
         // Checkout & Print Receipt
         elements.printReceipt.addEventListener('click', () => {
             try {
@@ -751,7 +981,7 @@
                 // Update stock
                 cart.forEach(item => {
                     if (inventory[item.barcode]) {
-                        inventory[item.barcode].stock -= 1;
+                        inventory[item.barcode].stock -= item.quantity;
                     }
                 });
                 localStorage.setItem('inventory', JSON.stringify(inventory));
@@ -760,12 +990,13 @@
                 // Generate transaction
                 const transactionId = generateUniqueId();
                 const orderNumber = generateOrderNumber();
+                const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
                 const transaction = {
                     id: transactionId,
                     orderNumber: orderNumber,
                     date: new Date().toLocaleString(),
                     items: [...cart],
-                    total: cart.reduce((sum, item) => sum + item.price, 0)
+                    total: cart.reduce((sum, item) => sum + (item.price * item.quantity), 0)
                 };
                 transactions.push(transaction);
                 localStorage.setItem('transactions', JSON.stringify(transactions));
@@ -774,39 +1005,7 @@
                 // Create receipt dynamically
                 const receiptDiv = document.createElement('div');
                 receiptDiv.className = 'no-print';
-                receiptDiv.innerHTML = `
-                    <div class="receipt">
-                        ${logoDataUrl ? `<img src="${logoDataUrl}" class="receipt-logo" alt="Company Logo">` : '<div class="receipt-logo">No Logo</div>'}
-                        <h2 class="text-2xl font-bold text-center text-gray-800 mt-4">${companyName ? companyName + ' Receipt' : 'Receipt'}</h2>
-                        <p class="text-center text-gray-600 mt-2">Transaction ID: ${transactionId}</p>
-                        <p class="text-center text-gray-600">Order Number: ${orderNumber}</p>
-                        <p class="text-center text-gray-600">Date: ${new Date().toLocaleString()}</p>
-                        <hr class="my-4 border-gray-300">
-                        <table class="w-full mt-4 border-collapse">
-                            <thead>
-                                <tr class="border-b border-gray-300">
-                                    <th class="text-left py-2 text-gray-800">Item</th>
-                                    <th class="text-right py-2 text-gray-800">Price</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                ${cart.map(item => `
-                                    <tr>
-                                        <td class="py-2 text-gray-800">${item.name}</td>
-                                        <td class="text-right py-2 text-gray-800">$${item.price.toFixed(2)}</td>
-                                    </tr>
-                                `).join('')}
-                            </tbody>
-                            <tfoot>
-                                <tr class="border-t border-gray-300 font-semibold">
-                                    <td class="py-2 text-gray-800">Total</td>
-                                    <td class="text-right py-2 text-gray-800">$${transaction.total.toFixed(2)}</td>
-                                </tr>
-                            </tfoot>
-                        </table>
-                        <p class="text-center text-gray-600 mt-4">Thank you for your purchase!</p>
-                    </div>
-                `;
+                receiptDiv.innerHTML = generateReceipt(transaction, totalItems);
                 document.body.appendChild(receiptDiv);
 
                 // Print receipt
@@ -826,25 +1025,76 @@
             }
         });
 
+        // Undo Last Transaction
+        function undoLastTransaction() {
+            try {
+                if (transactions.length === 0) {
+                    alert('No transactions to undo.');
+                    return;
+                }
+                const lastTransaction = transactions.pop();
+                lastTransaction.items.forEach(item => {
+                    if (inventory[item.barcode]) {
+                        inventory[item.barcode].stock += item.quantity;
+                    }
+                });
+                localStorage.setItem('inventory', JSON.stringify(inventory));
+                localStorage.setItem('transactions', JSON.stringify(transactions));
+                renderInventory();
+                renderTransactionHistory();
+                alert('Last transaction undone successfully.');
+            } catch (err) {
+                console.error('Error undoing transaction:', err);
+                alert('Error undoing transaction.');
+            }
+        }
+
+        // Print Receipt from History
+        function printTransactionReceipt(index) {
+            try {
+                const transaction = transactions[index];
+                const totalItems = transaction.items.reduce((sum, item) => sum + item.quantity, 0);
+                const receiptDiv = document.createElement('div');
+                receiptDiv.className = 'no-print';
+                receiptDiv.innerHTML = generateReceipt(transaction, totalItems);
+                document.body.appendChild(receiptDiv);
+
+                window.print();
+
+                setTimeout(() => {
+                    document.body.removeChild(receiptDiv);
+                }, 1000);
+            } catch (err) {
+                console.error('Error printing transaction receipt:', err);
+                alert('Error printing receipt.');
+            }
+        }
+
         // Render Transaction History
         function renderTransactionHistory() {
             try {
                 elements.transactionList.innerHTML = '';
-                transactions.forEach(transaction => {
+                transactions.forEach((transaction, index) => {
+                    const totalItems = transaction.items.reduce((sum, item) => sum + item.quantity, 0);
                     const transactionCard = document.createElement('div');
-                    transactionCard.className = 'bg-gray-50 p-4 rounded-md mb-4';
+                    transactionCard.className = 'bg-gray-700 light-mode:bg-gray-50 p-4 rounded-md mb-4';
                     let itemsHtml = '';
                     transaction.items.forEach(item => {
-                        itemsHtml += `<p class="text-sm text-gray-600">${item.name} - $${item.price.toFixed(2)}</p>`;
+                        itemsHtml += `<p class="text-sm text-gray-400 light-mode:text-gray-600">${item.name} - $${item.price.toFixed(2)} x ${item.quantity}</p>`;
                     });
+                    const isLatest = index === transactions.length - 1;
                     transactionCard.innerHTML = `
                         <div class="flex justify-between items-center mb-2">
-                            <h3 class="text-lg font-medium text-gray-800">Transaction ID: ${transaction.id}</h3>
-                            <p class="text-sm text-gray-600">Order #: ${transaction.orderNumber}</p>
+                            <h3 class="text-lg font-medium text-gray-200 light-mode:text-gray-800">Transaction ID: ${transaction.id}</h3>
+                            <p class="text-sm text-gray-400 light-mode:text-gray-600">Order #: ${transaction.orderNumber}</p>
                         </div>
-                        <p class="text-sm text-gray-600">Date: ${transaction.date}</p>
+                        <p class="text-sm text-gray-400 light-mode:text-gray-600">Date: ${transaction.date}</p>
                         ${itemsHtml}
-                        <p class="text-sm font-semibold text-gray-800 mt-2">Total: $${transaction.total.toFixed(2)}</p>
+                        <p class="text-sm font-semibold text-gray-200 light-mode:text-gray-800 mt-2">Total (${totalItems} items): $${transaction.total.toFixed(2)}</p>
+                        <div class="flex gap-2 mt-2">
+                            <button onclick="printTransactionReceipt(${index})" class="btn-success">Print Receipt</button>
+                            ${isLatest ? `<button onclick="undoLastTransaction()" class="btn-danger">Undo Transaction</button>` : ''}
+                        </div>
                     `;
                     elements.transactionList.appendChild(transactionCard);
                 });
@@ -1045,7 +1295,12 @@
                             lastScannedBarcode = barcode;
                             showFeedback(feedbackElement, `Scanned: ${barcode}`, true);
                             videoElement.classList.add('scanner-success');
-                            callback(barcode);
+                            if (section === 'pos') {
+                                const quantity = parseInt(elements.posQuantity.value) || 1;
+                                callback(barcode, quantity);
+                            } else {
+                                callback(barcode);
+                            }
 
                             // Set cooldown to prevent immediate re-scan
                             scanCooldown = true;
@@ -1149,26 +1404,12 @@
 
         // POS Scanner
         elements.posStartScanner.addEventListener('click', () => {
-            startScanner('pos', elements.posScannerVideo, elements.posScannerOverlay, elements.posScannerFeedback, elements.posStartScanner, elements.posStopScanner, (barcode) => {
-                addToCart(barcode);
+            startScanner('pos', elements.posScannerVideo, elements.posScannerOverlay, elements.posScannerFeedback, elements.posStartScanner, elements.posStopScanner, (barcode, quantity) => {
+                addToCart(barcode, quantity);
             });
         });
 
         elements.posStopScanner.addEventListener('click', stopScannerFunc);
-
-        elements.posManualScan.addEventListener('click', () => {
-            try {
-                const barcode = elements.posBarcode.value.trim();
-                if (barcode) {
-                    addToCart(barcode);
-                } else {
-                    showFeedback(elements.posScannerFeedback, 'Please enter a barcode.', false);
-                }
-            } catch (err) {
-                console.error('Error in POS manual scan:', err);
-                showFeedback(elements.posScannerFeedback, 'Error processing manual barcode.', false);
-            }
-        });
 
         // Main Scanner Section
         elements.startScanner.addEventListener('click', () => {
@@ -1177,7 +1418,7 @@
                 if (inventory[barcode]) {
                     const item = inventory[barcode];
                     message += ` - ${item.name} ($${item.price.toFixed(2)})`;
-                    cart.push({ barcode, ...item });
+                    cart.push({ barcode, ...item, quantity: 1 });
                     renderCart();
                 } else {
                     message += ' - Item not found in inventory.';
@@ -1196,7 +1437,7 @@
                     if (inventory[barcode]) {
                         const item = inventory[barcode];
                         message += ` - ${item.name} ($${item.price.toFixed(2)})`;
-                        cart.push({ barcode, ...item });
+                        cart.push({ barcode, ...item, quantity: 1 });
                         renderCart();
                     } else {
                         message += ' - Item not found in inventory.';
