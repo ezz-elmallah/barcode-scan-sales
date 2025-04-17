@@ -33,12 +33,13 @@
             max-width: 640px;
             margin: 0 auto;
             aspect-ratio: 4 / 3;
+            background: #000;
+            border-radius: 8px;
+            overflow: hidden;
         }
         .scanner-video {
             width: 100%;
             height: 100%;
-            border-radius: 8px;
-            border: 2px solid #3b82f6;
             object-fit: cover;
         }
         .scanner-overlay {
@@ -46,10 +47,10 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: 80%;
-            height: 80px;
-            border: 3px dashed #10b981;
-            background: rgba(255, 255, 255, 0.3);
+            width: 90%;
+            height: 60px;
+            border: 3px solid #ef4444;
+            background: rgba(255, 255, 255, 0.2);
             pointer-events: none;
         }
         .scanner-success {
@@ -82,6 +83,17 @@
         .success-message {
             color: #10b981;
             font-weight: 500;
+        }
+        .done-button {
+            background-color: #14b8a6;
+            color: white;
+            font-weight: bold;
+            padding: 8px 16px;
+            border-radius: 8px;
+            transition: background-color 0.3s ease;
+        }
+        .done-button:hover {
+            background-color: #0d9488;
         }
     </style>
 </head>
@@ -126,6 +138,7 @@
                     <div class="flex gap-2 mb-2">
                         <button id="inventoryStartScanner" class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition">Scan Barcode</button>
                         <button id="inventoryStopScanner" class="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 transition hidden">Stop Scanner</button>
+                        <button id="inventoryDoneScan" class="done-button hidden">Done</button>
                         <button id="inventoryManualScan" class="bg-purple-500 text-white px-4 py-2 rounded-md hover:bg-purple-600 transition">Submit Manual Barcode</button>
                     </div>
                     <input id="itemName" type="text" placeholder="Item Name" class="w-full p-2 border rounded-md mb-2">
@@ -161,6 +174,7 @@
             <div class="flex gap-2 mb-4">
                 <button id="posStartScanner" class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition">Scan Barcode</button>
                 <button id="posStopScanner" class="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 transition hidden">Stop Scanner</button>
+                <button id="posDoneScan" class="done-button hidden">Done</button>
                 <button id="posManualScan" class="bg-purple-500 text-white px-4 py-2 rounded-md hover:bg-purple-600 transition">Submit Manual Barcode</button>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -202,8 +216,11 @@
                 <input id="manualBarcode" type="text" placeholder="Enter barcode manually" class="scanner-input w-full p-2 rounded-md mb-2">
                 <button id="manualScan" class="bg-purple-500 text-white px-4 py-2 rounded-md hover:bg-purple-600 transition">Submit Manual Barcode</button>
             </div>
-            <button id="startScanner" class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition mt-4">Start Scanner</button>
-            <button id="stopScanner" class="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 transition mt-4 ml-2 hidden">Stop Scanner</button>
+            <div class="flex gap-2 mt-4">
+                <button id="startScanner" class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition">Start Scanner</button>
+                <button id="stopScanner" class="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 transition hidden">Stop Scanner</button>
+                <button id="doneScan" class="done-button hidden">Done</button>
+            </div>
         </div>
     </div>
 
@@ -234,6 +251,7 @@
         let cart = [];
         let scannerActive = false;
         let currentScannerSection = null;
+        let lastScannedBarcode = null;
 
         // DOM Elements
         const elements = {
@@ -258,6 +276,7 @@
             receiptTotal: document.getElementById('receiptTotal'),
             startScanner: document.getElementById('startScanner'),
             stopScanner: document.getElementById('stopScanner'),
+            doneScan: document.getElementById('doneScan'),
             scannerVideo: document.getElementById('scannerVideo'),
             scannerOverlay: document.getElementById('scannerOverlay'),
             scannerFeedback: document.getElementById('scannerFeedback'),
@@ -265,12 +284,14 @@
             manualScan: document.getElementById('manualScan'),
             inventoryStartScanner: document.getElementById('inventoryStartScanner'),
             inventoryStopScanner: document.getElementById('inventoryStopScanner'),
+            inventoryDoneScan: document.getElementById('inventoryDoneScan'),
             inventoryScannerVideo: document.getElementById('inventoryScannerVideo'),
             inventoryScannerOverlay: document.getElementById('inventoryScannerOverlay'),
             inventoryScannerFeedback: document.getElementById('inventoryScannerFeedback'),
             inventoryManualScan: document.getElementById('inventoryManualScan'),
             posStartScanner: document.getElementById('posStartScanner'),
             posStopScanner: document.getElementById('posStopScanner'),
+            posDoneScan: document.getElementById('posDoneScan'),
             posScannerVideo: document.getElementById('posScannerVideo'),
             posScannerOverlay: document.getElementById('posScannerOverlay'),
             posScannerFeedback: document.getElementById('posScannerFeedback'),
@@ -565,7 +586,7 @@
         }
 
         // Generic Barcode Scanner Function
-        function startScanner(section, videoElement, overlayElement, feedbackElement, startButton, stopButton, callback) {
+        function startScanner(section, videoElement, overlayElement, feedbackElement, startButton, stopButton, doneButton, callback) {
             if (scannerActive) {
                 console.warn(`Scanner already active in ${currentScannerSection}. Ignoring request for ${section}.`);
                 return;
@@ -610,6 +631,7 @@
                             overlayElement.classList.remove('hidden');
                             startButton.classList.add('hidden');
                             stopButton.classList.remove('hidden');
+                            doneButton.classList.add('hidden');
                             feedbackElement.classList.add('hidden');
                             console.log(`Scanner started for ${section}`);
                         } catch (startErr) {
@@ -621,10 +643,13 @@
                     Quagga.onDetected(function(data) {
                         try {
                             const barcode = data.codeResult.code;
-                            callback(barcode);
+                            lastScannedBarcode = barcode;
+                            showFeedback(feedbackElement, `Scanned: ${barcode}`, true);
                             videoElement.classList.add('scanner-success');
-                            setTimeout(() => videoElement.classList.remove('scanner-success'), 500);
-                            stopScannerFunc();
+                            stopButton.classList.add('hidden');
+                            doneButton.classList.remove('hidden');
+                            Quagga.pause();
+                            console.log(`Barcode detected in ${section}: ${barcode}`);
                         } catch (detectErr) {
                             console.error(`Error processing detected barcode (${section}):`, detectErr);
                             showFeedback(feedbackElement, 'Error processing barcode. Please try again.', false);
@@ -646,23 +671,27 @@
                     Quagga.stop();
                 }
                 scannerActive = false;
+                lastScannedBarcode = null;
                 if (currentScannerSection === 'inventory') {
                     elements.inventoryScannerVideo.classList.add('hidden');
                     elements.inventoryScannerOverlay.classList.add('hidden');
                     elements.inventoryStartScanner.classList.remove('hidden');
                     elements.inventoryStopScanner.classList.add('hidden');
+                    elements.inventoryDoneScan.classList.add('hidden');
                     elements.inventoryScannerFeedback.classList.add('hidden');
                 } else if (currentScannerSection === 'pos') {
                     elements.posScannerVideo.classList.add('hidden');
                     elements.posScannerOverlay.classList.add('hidden');
                     elements.posStartScanner.classList.remove('hidden');
                     elements.posStopScanner.classList.add('hidden');
+                    elements.posDoneScan.classList.add('hidden');
                     elements.posScannerFeedback.classList.add('hidden');
                 } else if (currentScannerSection === 'scanner') {
                     elements.scannerVideo.classList.add('hidden');
                     elements.scannerOverlay.classList.add('hidden');
                     elements.startScanner.classList.remove('hidden');
                     elements.stopScanner.classList.add('hidden');
+                    elements.doneScan.classList.add('hidden');
                     elements.scannerFeedback.classList.add('hidden');
                 }
                 currentScannerSection = null;
@@ -679,15 +708,45 @@
             }
         }
 
+        // Confirm Scan (Done Button)
+        function confirmScan(section, barcode, callback) {
+            try {
+                if (barcode) {
+                    callback(barcode);
+                } else {
+                    const feedbackElement = section === 'inventory' ? elements.inventoryScannerFeedback :
+                                            section === 'pos' ? elements.posScannerFeedback :
+                                            elements.scannerFeedback;
+                    showFeedback(feedbackElement, 'No barcode scanned. Please scan again.', false);
+                }
+                stopScannerFunc();
+            } catch (err) {
+                console.error(`Error confirming scan (${section}):`, err);
+                const feedbackElement = section === 'inventory' ? elements.inventoryScannerFeedback :
+                                        section === 'pos' ? elements.posScannerFeedback :
+                                        elements.scannerFeedback;
+                showFeedback(feedbackElement, 'Error confirming scan. Please try again.', false);
+            }
+        }
+
         // Inventory Scanner
         elements.inventoryStartScanner.addEventListener('click', () => {
-            startScanner('inventory', elements.inventoryScannerVideo, elements.inventoryScannerOverlay, elements.inventoryScannerFeedback, elements.inventoryStartScanner, elements.inventoryStopScanner, (barcode) => {
-                elements.barcodeInput.value = barcode;
-                showFeedback(elements.inventoryScannerFeedback, `Scanned barcode: ${barcode}`, true);
+            startScanner('inventory', elements.inventoryScannerVideo, elements.inventoryScannerOverlay, elements.inventoryScannerFeedback, elements.inventoryStartScanner, elements.inventoryStopScanner, elements.inventoryDoneScan, (barcode) => {
+                elements.inventoryDoneScan.onclick = () => confirmScan('inventory', lastScannedBarcode, (barcode) => {
+                    elements.barcodeInput.value = barcode;
+                    showFeedback(elements.inventoryScannerFeedback, `Confirmed barcode: ${barcode}`, true);
+                });
             });
         });
 
         elements.inventoryStopScanner.addEventListener('click', stopScannerFunc);
+
+        elements.inventoryDoneScan.addEventListener('click', () => {
+            confirmScan('inventory', lastScannedBarcode, (barcode) => {
+                elements.barcodeInput.value = barcode;
+                showFeedback(elements.inventoryScannerFeedback, `Confirmed barcode: ${barcode}`, true);
+            });
+        });
 
         elements.inventoryManualScan.addEventListener('click', () => {
             try {
@@ -706,12 +765,20 @@
 
         // POS Scanner
         elements.posStartScanner.addEventListener('click', () => {
-            startScanner('pos', elements.posScannerVideo, elements.posScannerOverlay, elements.posScannerFeedback, elements.posStartScanner, elements.posStopScanner, (barcode) => {
-                addToCart(barcode);
+            startScanner('pos', elements.posScannerVideo, elements.posScannerOverlay, elements.posScannerFeedback, elements.posStartScanner, elements.posStopScanner, elements.posDoneScan, (barcode) => {
+                elements.posDoneScan.onclick = () => confirmScan('pos', lastScannedBarcode, (barcode) => {
+                    addToCart(barcode);
+                });
             });
         });
 
         elements.posStopScanner.addEventListener('click', stopScannerFunc);
+
+        elements.posDoneScan.addEventListener('click', () => {
+            confirmScan('pos', lastScannedBarcode, (barcode) => {
+                addToCart(barcode);
+            });
+        });
 
         elements.posManualScan.addEventListener('click', () => {
             try {
@@ -729,8 +796,27 @@
 
         // Main Scanner Section
         elements.startScanner.addEventListener('click', () => {
-            startScanner('scanner', elements.scannerVideo, elements.scannerOverlay, elements.scannerFeedback, elements.startScanner, elements.stopScanner, (barcode) => {
-                let message = `Scanned Barcode: ${barcode}`;
+            startScanner('scanner', elements.scannerVideo, elements.scannerOverlay, elements.scannerFeedback, elements.startScanner, elements.stopScanner, elements.doneScan, (barcode) => {
+                elements.doneScan.onclick = () => confirmScan('scanner', lastScannedBarcode, (barcode) => {
+                    let message = `Confirmed Barcode: ${barcode}`;
+                    if (inventory[barcode]) {
+                        const item = inventory[barcode];
+                        message += ` - ${item.name} ($${item.price.toFixed(2)})`;
+                        cart.push({ barcode, ...item });
+                        renderCart();
+                    } else {
+                        message += ' - Item not found in inventory.';
+                    }
+                    showFeedback(elements.scannerFeedback, message, true);
+                });
+            });
+        });
+
+        elements.stopScanner.addEventListener('click', stopScannerFunc);
+
+        elements.doneScan.addEventListener('click', () => {
+            confirmScan('scanner', lastScannedBarcode, (barcode) => {
+                let message = `Confirmed Barcode: ${barcode}`;
                 if (inventory[barcode]) {
                     const item = inventory[barcode];
                     message += ` - ${item.name} ($${item.price.toFixed(2)})`;
@@ -742,8 +828,6 @@
                 showFeedback(elements.scannerFeedback, message, true);
             });
         });
-
-        elements.stopScanner.addEventListener('click', stopScannerFunc);
 
         elements.manualScan.addEventListener('click', () => {
             try {
